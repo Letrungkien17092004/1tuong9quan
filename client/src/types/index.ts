@@ -1,0 +1,81 @@
+interface BoardNode {
+    nodeId: string
+    row: number
+    col: number
+}
+
+interface PieceNode {
+    side: "red" | "blue"
+    isKing: boolean
+    nodeId: string
+}
+
+interface BoardLine {
+    lineId: string
+    nodeIds: string[]
+}
+
+class BoardGraph {
+    readonly nodes: BoardNode[]
+    readonly edges: Record<string, string[]>
+    readonly lines: BoardLine[]
+    readonly pieces: PieceNode[]
+    readonly rows: number
+    readonly cols: number
+    readonly cell: number
+
+    constructor(rows: number, cols: number, cell: number) {
+        this.nodes = []
+        this.edges = {}
+        this.lines = []
+        this.pieces = []
+        this.rows = rows
+        this.cols = cols
+        this.cell = cell
+
+        // create node with nodeId such as: A0, A01, B0, B1...
+        // create each row one by one
+        const rowNames: ["A", "B", "C", "D", "E"] = ["A", "B", "C", "D", "E"]
+        rowNames.forEach((rowName, rowIdx) => {
+            for (let colIdx = 0; colIdx < this.cols; colIdx++) {
+                const newNode: BoardNode = {
+                    nodeId: `${rowName}${colIdx}`,
+                    row: rowIdx,
+                    col: colIdx
+                }
+                this.nodes.push(newNode)
+            }
+        })
+
+        this.edges["A0"] = ["A1", "B0", "B1"]
+        this.edges["A1"] = ["A0", "B1", "B2"]
+        this.edges["A2"] = ["A1", "B1", "B2", "B3", "A3"]
+        this.edges["A3"] = ["A2", "B3", "A4"]
+        this.edges["A4"] = ["A3", "B3", "B4"]
+
+        this.edges["B0"] = ["A0", "B1", "C0"]
+        this.edges["B1"] = ["A0", "B0", "C0", "C1", "C2", "B2", "A2", "A1"]
+        this.edges["B2"] = ["B1", "C2", "B3", "A2"]
+        this.edges["B3"] = ["A2", "B2", "C2", "C3", "C4", "B4", "A4", "A3"]
+        this.edges["B4"] = ["B3", "C4", "A4"]
+
+        this.edges["C0"] = ["B0", "D0", "B1", "C1", "D1"]
+        this.edges["C1"] = ["C0", "D1", "C2", "B1"]
+        this.edges["C2"] = ["B1", "C1", "D1", "D2", "D3", "C3", "B3", "B2"]
+        this.edges["C3"] = ["C2", "D3", "C4", "B3"]
+        this.edges["C4"] = ["B3", "C3", "D3", "B4", "D4"]
+
+        this.edges["D0"] = ["C0", "E0", "D1"]
+        this.edges["D1"] = ["C0", "D0", "E0", "E1", "E2", "D2", "C2", "C1"]
+        this.edges["D2"] = ["D1", "E2", "D3", "C2"]
+        this.edges["D3"] = ["C2", "D2", "E2", "E3", "E4", "D4", "C4", "C3"]
+        this.edges["D4"] = ["D3", "E4", "C4"]
+
+        this.edges["E0"] = ["D0", "D1", "E1"]
+        this.edges["E1"] = ["E0", "D1", "E2"]
+        this.edges["E2"] = ["D1", "E1", "E3", "D3", "D2"]
+        this.edges["E3"] = ["E2", "D3", "E4"]
+        this.edges["E4"] = ["D3", "E3", "D4"]
+
+    }
+}
