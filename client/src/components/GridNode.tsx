@@ -1,28 +1,31 @@
-import Piece from "./Piece"
 
 interface PiecesLayerProps {
     CELL: number,
     STROKE: number,
-    nodes: {
+    nodesInPixel: {
         nodeId: string,
         pos: {
             x: number,
             y: number
         }
-    }[]
+    }[],
+    onClickNode: (nodeId: string) => (e: React.MouseEvent) => void
 }
 
-export default function GridNode({ CELL, STROKE, nodes }: PiecesLayerProps) {
+export default function GridNode({ CELL, STROKE, nodesInPixel, onClickNode }: PiecesLayerProps) {
 
     return <>
-        {nodes.map(node => (
-            <Piece
-                pos={{ x: node.pos.x, y: node.pos.y }}
-                r={CELL / 5}
-                stroke={STROKE}
-                side="green"
-                isKing={true}
-                text={node.nodeId}
-            />))}
+        {nodesInPixel.map(node => (
+            <g
+                key={`gridNode${node.nodeId}`}
+                transform={`translate(${node.pos.x}, ${node.pos.y})`}
+                onClick={onClickNode(node.nodeId)}
+            >
+                <circle
+                    fill="#00000000"
+                    r={CELL / 5}
+                />
+            </g>)
+        )}
     </>
 }

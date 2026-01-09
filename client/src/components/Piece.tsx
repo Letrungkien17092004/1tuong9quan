@@ -5,16 +5,18 @@ interface PieceProps {
     stroke: number,
     side: "green" | "blue",
     isKing: boolean,
-    text: string
+    text: string,
+    onClick: (e: React.MouseEvent) => void
 
 }
 
-export default function Piece({ pos, r, stroke, side, isKing, text }: PieceProps) {
+export default function Piece({ pos, r, stroke, side, isKing, text, onClick }: PieceProps) {
     return <>
         <g
             transform={`translate(${pos.x}, ${pos.y})`}
             fill={side === "green" ? "#00c951" : "#003dff"}
             className="transition cursor-pointer"
+            onClick={onClick}
         >
             <circle
                 r={r}
@@ -25,7 +27,7 @@ export default function Piece({ pos, r, stroke, side, isKing, text }: PieceProps
                 fill="#fff"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize={r/1.5}
+                fontSize={r / 1.5}
                 fontWeight="bold"
             >
                 {text}
