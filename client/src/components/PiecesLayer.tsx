@@ -8,26 +8,25 @@ interface PiecesLayerProps {
         pos: {
             x: number,
             y: number
-        }
+        },
+        isClicked: boolean
     })[],
-    onClickPiece: (nodeId: string) => (e: React.MouseEvent) => void
+    onClickPiece: (pieceId: string) => (e: React.MouseEvent) => void
 }
 
 export default function PiecesLayer({ CELL, STROKE, piecesWithPixel, onClickPiece }: PiecesLayerProps) {
     const pieceReactElm = piecesWithPixel.map(piece =>
         <Piece
-            key={`${piece.nodeId}${piece.side}`}
+            key={`${piece.pieceId}`}
             pos={piece.pos}
-            onClick={onClickPiece(piece.nodeId)}
+            onClick={onClickPiece(piece.pieceId)}
             r={CELL / 5}
             stroke={STROKE}
             side={piece.side}
             isKing={piece.isKing}
-            text="VUA"
+            isClicked={piece.isClicked}
         />
     )
-    console.log(pieceReactElm)
-    console.log(typeof pieceReactElm[0])
     return <>
         {pieceReactElm}
     </>

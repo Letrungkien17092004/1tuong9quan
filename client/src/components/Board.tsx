@@ -1,9 +1,10 @@
 import BoardGrid from './BoardGrid.tsx'
 import PiecesLayer from './PiecesLayer.tsx'
 import GridNode from './GridNode.tsx'
-import type { IBoardGraph } from '../types/index.ts'
-import BoardGraphService from '../services/BoardGraphService.ts'
-import { useCallback } from 'react'
+// import type { IBoardGraph } from '../types/index.ts'
+// import BoardGraphService from '../services/BoardGraphService.ts'
+import { useBoardGraph } from "../hooks/index.ts"
+import { useCallback, useState } from 'react'
 
 const ROWS = 5
 const COLS = 5
@@ -15,23 +16,28 @@ const HEIGHT = (ROWS - 1) * CELL + OFFSET * 2
 
 
 export default function Board() {
-    const boardGraph: IBoardGraph = new BoardGraphService(ROWS, COLS, CELL)
+    const { nodesInPixel, piecesWithPixel, movePiece, clickedPiece, onClickPiece } = useBoardGraph(ROWS, COLS, CELL)
 
-    const onClickPiece = useCallback((nodeId: string) => {
+    const onClickPieceEvent = useCallback((pieceId: string) => {
         return (e: React.MouseEvent) => {
             e.stopPropagation()
             e.preventDefault()
-            console.log(`clicked to piece ${nodeId}`)
+            console.log(`clicked to piece ${pieceId}`)
+            onClickPiece(pieceId)
         }
     }, [])
 
-    const onClickNode = useCallback((nodeId: string) => {
+    const onClickNodeEvent = useCallback((nodeId: string) => {
         return (e: React.MouseEvent) => {
             e.stopPropagation()
             e.preventDefault()
             console.log(`clicked to node ${nodeId}`)
+            console.log("clicked PieceId ", clickedPiece?.pieceId)
+            if (clickedPiece) {
+                movePiece(clickedPiece.pieceId, nodeId)
+            }
         }
-    }, [])
+    }, [clickedPiece, movePiece])
 
     return <>
         <div className="w-full">
@@ -45,27 +51,18 @@ export default function Board() {
                         STROKE={STROKE}
                     />
 
+                    {/* invisiable */}
                     <GridNode
                         CELL={CELL}
-                        STROKE={STROKE}
-                        nodesInPixel={boardGraph.nodes.map(node => ({
-                            nodeId: node.nodeId,
-                            pos: boardGraph.convertNodeToPixel(node.nodeId)
-                        }))}
-                        onClickNode={onClickNode}
+                        nodesInPixel={nodesInPixel}
+                        onClickNode={onClickNodeEvent}
                     />
 
                     <PiecesLayer
                         CELL={CELL}
                         STROKE={STROKE}
-                        piecesWithPixel={boardGraph.pieces.map(piece => {
-                            const temp = {
-                                ...piece,
-                                pos: boardGraph.convertNodeToPixel(piece.nodeId)
-                            }
-                            return temp
-                        })}
-                        onClickPiece={onClickPiece}
+                        piecesWithPixel={piecesWithPixel}
+                        onClickPiece={onClickPieceEvent}
                     />
                 </svg>
             </div>

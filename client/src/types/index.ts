@@ -5,6 +5,7 @@ export interface IBoardNode {
 }
 
 export interface IPieceNode {
+    pieceId: string
     side: "green" | "blue"
     isKing: boolean
     nodeId: string
@@ -26,10 +27,10 @@ export interface IBoardGraph {
 
     /**
      * check can move from the node to other node by nodeId
-     * @param from from nodeId
-     * @param to to nodeId
+     * @param fromNodeId from nodeId
+     * @param toNodeId to nodeId
      */
-    canMove(from: string, to: string): boolean
+    canMove(fromNodeId: string, toNodeId: string): boolean
 
     /**
      * Convert from row and col positions of a node to pixel positions
@@ -42,5 +43,19 @@ export interface IBoardGraph {
      * @param nodeId 
      */
     getNodeFromId(nodeId: string): IBoardNode | undefined
+
+    /**
+     * find a piece by the pieceId
+     * @param pieceId 
+     */
+    getPieceById(pieceId: string): IPieceNode | undefined
+
+    /**
+     * Move a piece
+     * @param fromPieceId 
+     * @param toNodeId 
+     * @returns 
+     */
+    movePiece(fromPieceId: string, toNodeId: string): boolean
 }
 

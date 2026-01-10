@@ -1,7 +1,6 @@
 
 interface PiecesLayerProps {
     CELL: number,
-    STROKE: number,
     nodesInPixel: {
         nodeId: string,
         pos: {
@@ -12,7 +11,7 @@ interface PiecesLayerProps {
     onClickNode: (nodeId: string) => (e: React.MouseEvent) => void
 }
 
-export default function GridNode({ CELL, STROKE, nodesInPixel, onClickNode }: PiecesLayerProps) {
+export default function GridNode({ CELL, nodesInPixel, onClickNode }: PiecesLayerProps) {
 
     return <>
         {nodesInPixel.map(node => (

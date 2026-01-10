@@ -63,104 +63,144 @@ export default class BoardGraphService {
         this.edges["E4"] = ["D3", "E3", "D4"]
 
         // setup the default position for each piece
+        let pieceCount = 0
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "A0"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "A1"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: true, // king
             nodeId: "A2"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "A3"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "A4"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "B0"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "B1"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "B3"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "B4"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_green_${pieceCount}`,
             side: "green",
             isKing: false,
             nodeId: "C0"
         })
 
         // blue
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "C4"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "D0"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "D1"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "D3"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "D4"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "E0"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "E1"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: true, // king
             nodeId: "E2"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "E3"
         })
+        pieceCount++
         this.pieces.push({
+            pieceId: `piece_blue_${pieceCount}`,
             side: "blue",
             isKing: false,
             nodeId: "E4"
@@ -170,12 +210,12 @@ export default class BoardGraphService {
 
     /**
      * check can move from the node to other node by nodeId
-     * @param from from nodeId
-     * @param to to nodeId
+     * @param fromNodeId from nodeId
+     * @param toNodeId to nodeId
      */
-    canMove(from: string, to: string): boolean {
-        if (this.edges[from]) {
-            return this.edges[from].includes(to)
+    canMove(fromNodeId: string, toNodeId: string): boolean {
+        if (this.edges[fromNodeId]) {
+            return this.edges[fromNodeId].includes(toNodeId)
         }
         throw new Error("invalid nodeId")
     }
@@ -201,5 +241,28 @@ export default class BoardGraphService {
      */
     getNodeFromId(nodeId: string): IBoardNode | undefined {
         return this.nodes.find(node => node.nodeId === nodeId)
+    }
+
+    /**
+     * find a piece by the pieceId
+     * @param pieceId 
+     */
+    getPieceById(pieceId: string): IPieceNode | undefined {
+        return this.pieces.find(piece => piece.pieceId === pieceId)
+    }
+
+    /**
+     * Move a piece
+     * @param fromPieceId 
+     * @param toNodeId 
+     * @returns 
+     */
+    movePiece(fromPieceId: string, toNodeId: string): boolean {
+        const piece = this.getPieceById(fromPieceId)
+        if (piece && this.canMove(piece.nodeId, toNodeId)) {
+            piece.nodeId = toNodeId // auto update in this.pieces because it's reference
+            return true
+        }
+        return false
     }
 }
