@@ -1,5 +1,5 @@
-import useBoardGraph from "./useBoardGraph.ts";
+import useBoardManager from "./useBoardManager.ts";
 
 export {
-    useBoardGraph
+    useBoardManager
 }

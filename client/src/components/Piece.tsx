@@ -12,9 +12,14 @@ interface PieceProps {
 export default function Piece({ pos, r, stroke, side, isKing, onClick, isClicked }: PieceProps) {
     return (
         <g
-            transform={`translate(${pos.x}, ${pos.y})`}
+            style={{
+                transform: `translate(${pos.x}px, ${pos.y}px)`,
+                transition: 'transform 200ms ease',
+                transformBox: 'fill-box',
+                transformOrigin: 'center',
+            }}
             fill={side === "green" ? "#00c951" : "#003dff"}
-            className="transition cursor-pointer"
+            className="transition-all duration-500 cursor-pointer"
             onClick={onClick}
         >
             <circle

@@ -4,18 +4,21 @@ import type { IPieceNode } from "../types/index.ts"
 interface PiecesLayerProps {
     CELL: number,
     STROKE: number,
-    piecesWithPixel: (IPieceNode & {
+    piecesToRender:  {
+        pieceId: string,
+        side: "blue" | "green",
+        isKing: boolean,
         pos: {
             x: number,
             y: number
         },
         isClicked: boolean
-    })[],
+    }[],
     onClickPiece: (pieceId: string) => (e: React.MouseEvent) => void
 }
 
-export default function PiecesLayer({ CELL, STROKE, piecesWithPixel, onClickPiece }: PiecesLayerProps) {
-    const pieceReactElm = piecesWithPixel.map(piece =>
+export default function PiecesLayer({ CELL, STROKE, piecesToRender, onClickPiece }: PiecesLayerProps) {
+    const pieceReactElm = piecesToRender.map(piece =>
         <Piece
             key={`${piece.pieceId}`}
             pos={piece.pos}

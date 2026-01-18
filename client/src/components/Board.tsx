@@ -1,10 +1,8 @@
 import BoardGrid from './BoardGrid.tsx'
 import PiecesLayer from './PiecesLayer.tsx'
-import GridNode from './GridNode.tsx'
-// import type { IBoardGraph } from '../types/index.ts'
-// import BoardGraphService from '../services/BoardGraphService.ts'
-import { useBoardGraph } from "../hooks/index.ts"
-import { useCallback, useState } from 'react'
+import NodesLayer from './NodesLayer.tsx'
+import { useBoardManager } from "../hooks/index.ts"
+import { useCallback, useEffect, useState } from 'react'
 
 const ROWS = 5
 const COLS = 5
@@ -14,30 +12,98 @@ const STROKE = 2
 const WIDTH = (COLS - 1) * CELL + OFFSET * 2
 const HEIGHT = (ROWS - 1) * CELL + OFFSET * 2
 
+type NodeToRender = {
+    nodeId: string,
+    pos: {
+        x: number,
+        y: number
+    }
+}
+
+type PieceToRender = {
+    pieceId: string,
+    side: "blue" | "green",
+    isKing: boolean,
+    pos: {
+        x: number,
+        y: number
+    },
+    isClicked: boolean
+}
+
+// utils function
+function convertPieceToXYPosition(nodesToRender: NodeToRender[], attachedNodeId: string) {
+    const node = nodesToRender.find(nodeRd => nodeRd.nodeId === attachedNodeId)
+    if (!node) { throw new Error("node was not found") }
+    return node.pos
+
+}
 
 export default function Board() {
-    const { nodesInPixel, piecesWithPixel, movePiece, clickedPiece, onClickPiece } = useBoardGraph(ROWS, COLS, CELL)
 
-    const onClickPieceEvent = useCallback((pieceId: string) => {
+    const {
+        nodes, pieces, selectedPieceId, selectPiece,
+        attemptMove, isSelectKing, tryCapturePiece
+    } = useBoardManager(ROWS, COLS, CELL)
+
+    const [nodesToRender] = useState<NodeToRender[]>(nodes.map(node => ({
+        nodeId: node.nodeId,
+        pos: {
+            x: node.col * CELL,
+            y: node.row * CELL
+        }
+    })))
+
+    const [piecesToRender, setPiecesToRender] = useState<PieceToRender[]>(pieces.map(piece => ({
+        pieceId: piece.pieceId,
+        side: piece.side,
+        isKing: piece.isKing,
+        isClicked: piece.pieceId === selectedPieceId,
+        pos: convertPieceToXYPosition(nodesToRender, piece.nodeId)
+    })))
+
+    // refesh piecesToRender
+    useEffect(() => {
+        setPiecesToRender(pieces.map(piece => ({
+            pieceId: piece.pieceId,
+            side: piece.side,
+            isKing: piece.isKing,
+            isClicked: piece.pieceId === selectedPieceId,
+            pos: convertPieceToXYPosition(nodesToRender, piece.nodeId)
+        })))
+    }, [pieces, selectedPieceId, nodesToRender])
+
+    // event handler factory
+    const createClickPieceEventHandler = useCallback((pieceId: string) => {
         return (e: React.MouseEvent) => {
             e.stopPropagation()
             e.preventDefault()
             console.log(`clicked to piece ${pieceId}`)
-            onClickPiece(pieceId)
+            if (selectedPieceId && isSelectKing) {
+                const pieceA = piecesToRender.find(p => p.pieceId === selectedPieceId)
+                const pieceB = piecesToRender.find(p => p.pieceId === pieceId)
+                if (!pieceA || !pieceB) { throw new Error("Piece was not found") }
+                if (pieceA.side !== pieceB.side) {
+                    tryCapturePiece(pieceB.pieceId)
+                    return
+                } else {
+                    selectPiece(pieceId)
+                }
+            } else {
+                selectPiece(pieceId)
+            }
         }
-    }, [])
+    }, [selectedPieceId, selectPiece, isSelectKing])
 
-    const onClickNodeEvent = useCallback((nodeId: string) => {
+    // event handler factory
+    const createClickNodeEventHandler = useCallback((nodeId: string) => {
         return (e: React.MouseEvent) => {
             e.stopPropagation()
             e.preventDefault()
             console.log(`clicked to node ${nodeId}`)
-            console.log("clicked PieceId ", clickedPiece?.pieceId)
-            if (clickedPiece) {
-                movePiece(clickedPiece.pieceId, nodeId)
-            }
+            attemptMove(nodeId)
         }
-    }, [clickedPiece, movePiece])
+    }, [attemptMove])
 
     return <>
         <div className="w-full">
@@ -52,17 +118,17 @@ export default function Board() {
                     />
 
                     {/* invisiable */}
-                    <GridNode
+                    <NodesLayer
                         CELL={CELL}
-                        nodesInPixel={nodesInPixel}
-                        onClickNode={onClickNodeEvent}
+                        nodesToRender={nodesToRender}
+                        onClickNode={createClickNodeEventHandler}
                     />
 
                     <PiecesLayer
                         CELL={CELL}
                         STROKE={STROKE}
-                        piecesWithPixel={piecesWithPixel}
-                        onClickPiece={onClickPieceEvent}
+                        piecesToRender={piecesToRender}
+                        onClickPiece={createClickPieceEventHandler}
                     />
                 </svg>
             </div>

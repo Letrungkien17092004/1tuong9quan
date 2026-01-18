@@ -56,6 +56,47 @@ export interface IBoardGraph {
      * @param toNodeId 
      * @returns 
      */
-    movePiece(fromPieceId: string, toNodeId: string): boolean
+    attemptMove(fromPieceId: string, toNodeId: string): void
+
+    /**
+     * get common line betwwen two nodes
+     * @param nodeIdA nodeId A
+     * @param nodeIdB nodeId B
+     */
+    getCommonLine(nodeIdA: string, nodeIdB: string): IBoardLine | undefined
+    
+    /**
+     * get a piece by nodeId has attached to that element
+     * @param nodeId 
+     */
+    getPieceByNodeId(nodeId: string): IPieceNode | undefined
+
+    /**
+     * Remove a piece by pieceId
+     * @param pieceId 
+     * @returns true if success, otherwise false
+     */
+    removePieceById(pieceId: string): void
+    
+    /**
+     * Check if one node can capture another node
+     * @param pieceIdA pieceId of the capture node
+     * @param pieceIdB pieceId of the node will be captured
+     */
+    canCapture(pieceIdA: string, pieceIdB: string): boolean
+
+    /**
+     * Capture a piece
+     * # include following way:
+     * - check can capture
+     * - remove piece will be captured
+     * - move piece canture to new position (asign new nodeId)
+     * 
+     * @param pieceIdA 
+     * @param pieceIdB 
+     * @returns 
+     */
+    tryCapturePiece(pieceIdA: string, pieceIdB: string): boolean
+
 }
 

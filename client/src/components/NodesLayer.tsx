@@ -1,7 +1,7 @@
 
 interface PiecesLayerProps {
     CELL: number,
-    nodesInPixel: {
+    nodesToRender: {
         nodeId: string,
         pos: {
             x: number,
@@ -11,10 +11,10 @@ interface PiecesLayerProps {
     onClickNode: (nodeId: string) => (e: React.MouseEvent) => void
 }
 
-export default function GridNode({ CELL, nodesInPixel, onClickNode }: PiecesLayerProps) {
+export default function NodesLayer({ CELL, nodesToRender, onClickNode }: PiecesLayerProps) {
 
     return <>
-        {nodesInPixel.map(node => (
+        {nodesToRender.map(node => (
             <g
                 key={`gridNode${node.nodeId}`}
                 transform={`translate(${node.pos.x}, ${node.pos.y})`}
