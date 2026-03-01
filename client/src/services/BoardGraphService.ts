@@ -5,18 +5,16 @@ export default class BoardGraphService implements IBoardGraph {
     readonly edges: Record<string, string[]>
     readonly lines: IBoardLine[]
     pieces: IPieceNode[]
-    readonly rows: number
-    readonly cols: number
-    readonly cell: number
+    readonly rows: number = 5
+    readonly cols: number = 5
+    readonly cellSize: number
 
-    constructor(rows: number, cols: number, cell: number) {
+    constructor(cellSize: number) {
         this.nodes = []
         this.edges = {}
         this.lines = []
         this.pieces = []
-        this.rows = rows
-        this.cols = cols
-        this.cell = cell
+        this.cellSize = cellSize
 
         // create node with nodeId such as: A0, A01, B0, B1...
         // create each row one by one
@@ -313,8 +311,8 @@ export default class BoardGraphService implements IBoardGraph {
         const node = this.getNodeFromId(nodeId)
         if (node) {
             return {
-                x: node.col * this.cell,
-                y: node.row * this.cell
+                x: node.col * this.cellSize,
+                y: node.row * this.cellSize
             }
         }
         throw new Error("invalid nodeId")

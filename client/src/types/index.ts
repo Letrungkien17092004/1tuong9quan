@@ -23,7 +23,7 @@ export interface IBoardGraph {
     readonly pieces: IPieceNode[]
     readonly rows: number
     readonly cols: number
-    readonly cell: number
+    readonly cellSize: number
 
     /**
      * check can move from the node to other node by nodeId

@@ -4,13 +4,12 @@ import NodesLayer from './NodesLayer.tsx'
 import { useBoardManager } from "../hooks/index.ts"
 import { useCallback, useEffect, useState } from 'react'
 
-const ROWS = 5
-const COLS = 5
-const CELL = 100
+
+const CELLSIZE = 100
 const OFFSET = 2
 const STROKE = 2
-const WIDTH = (COLS - 1) * CELL + OFFSET * 2
-const HEIGHT = (ROWS - 1) * CELL + OFFSET * 2
+const WIDTH = (5 - 1) * CELLSIZE + OFFSET * 2
+const HEIGHT = (5 - 1) * CELLSIZE + OFFSET * 2
 
 type NodeToRender = {
     nodeId: string,
@@ -44,13 +43,13 @@ export default function Board() {
     const {
         nodes, pieces, selectedPieceId, selectPiece,
         attemptMove, isSelectKing, tryCapturePiece
-    } = useBoardManager(ROWS, COLS, CELL)
+    } = useBoardManager(CELLSIZE)
 
     const [nodesToRender] = useState<NodeToRender[]>(nodes.map(node => ({
         nodeId: node.nodeId,
         pos: {
-            x: node.col * CELL,
-            y: node.row * CELL
+            x: node.col * CELLSIZE,
+            y: node.row * CELLSIZE
         }
     })))
 
@@ -110,23 +109,21 @@ export default function Board() {
             <div className="w-5/10 my-0 mx-auto flex justify-center items-center">
                 <svg className='overflow-visible p-1 shadow-2xl' width={WIDTH} height={HEIGHT}>
                     <BoardGrid
-                        COLS={COLS}
-                        ROWS={ROWS}
-                        CELL={CELL}
-                        OFFSET={OFFSET}
-                        STROKE={STROKE}
+                        cellSize={CELLSIZE}
+                        offset={OFFSET}
+                        stroke={STROKE}
                     />
 
                     {/* invisiable */}
                     <NodesLayer
-                        CELL={CELL}
+                        cellSize={CELLSIZE}
                         nodesToRender={nodesToRender}
                         onClickNode={createClickNodeEventHandler}
                     />
 
                     <PiecesLayer
-                        CELL={CELL}
-                        STROKE={STROKE}
+                        cellSize={CELLSIZE}
+                        stroke={STROKE}
                         piecesToRender={piecesToRender}
                         onClickPiece={createClickPieceEventHandler}
                     />

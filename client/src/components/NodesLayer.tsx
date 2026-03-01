@@ -1,6 +1,6 @@
 
 interface PiecesLayerProps {
-    CELL: number,
+    cellSize: number,
     nodesToRender: {
         nodeId: string,
         pos: {
@@ -11,7 +11,7 @@ interface PiecesLayerProps {
     onClickNode: (nodeId: string) => (e: React.MouseEvent) => void
 }
 
-export default function NodesLayer({ CELL, nodesToRender, onClickNode }: PiecesLayerProps) {
+export default function NodesLayer({ cellSize, nodesToRender, onClickNode }: PiecesLayerProps) {
 
     return <>
         {nodesToRender.map(node => (
@@ -22,7 +22,7 @@ export default function NodesLayer({ CELL, nodesToRender, onClickNode }: PiecesL
             >
                 <circle
                     fill="#00000000"
-                    r={CELL / 5}
+                    r={cellSize / 5}
                 />
             </g>)
         )}

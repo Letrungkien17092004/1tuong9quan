@@ -3,11 +3,12 @@ import BoardGraphService from '../services/BoardGraphService.ts'
 import { useCallback, useRef, useState } from 'react'
 
 
-export default function useBoardManager(ROWS: number, COLS: number, CELL: number) {
-    const engineRef = useRef<IBoardGraph>(new BoardGraphService(ROWS, COLS, CELL))
+export default function useBoardManager(cellSize: number) {
+    const engineRef = useRef<IBoardGraph>(new BoardGraphService(cellSize))
     const [nodes] = useState<IBoardNode[]>([...engineRef.current.nodes])
     const [pieces, setPieces] = useState<IPieceNode[]>([...engineRef.current.pieces])
     const [selectedPieceId, setSelectedPieceId] = useState<string | undefined>(undefined)
+    const [currentTurn, setCurrentTurn] = useState<"blue" | "green">("blue")
     const [isSelectKing, setIsSelectKing] = useState<boolean>(false)
 
     const attemptMove = useCallback((desNodeId: string) => {
