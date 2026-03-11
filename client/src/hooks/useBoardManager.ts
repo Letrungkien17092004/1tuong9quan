@@ -3,8 +3,8 @@ import BoardGraphService from '../services/BoardGraphService.ts'
 import { useCallback, useRef, useState } from 'react'
 
 
-export default function useBoardManager(cellSize: number) {
-    const engineRef = useRef<IBoardGraph>(new BoardGraphService(cellSize))
+export default function useBoardManager() {
+    const engineRef = useRef<IBoardGraph>(new BoardGraphService())
     const [nodes] = useState<IBoardNode[]>([...engineRef.current.nodes])
     const [pieces, setPieces] = useState<IPieceNode[]>([...engineRef.current.pieces])
     const [selectedPieceId, setSelectedPieceId] = useState<string | undefined>(undefined)

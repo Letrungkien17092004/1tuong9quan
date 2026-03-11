@@ -1,29 +1,28 @@
-export interface IBoardNode {
+interface IBoardNode {
     nodeId: string
     row: number
     col: number
 }
 
-export interface IPieceNode {
+interface IPieceNode {
     pieceId: string
     side: "green" | "blue"
     isKing: boolean
     nodeId: string
 }
 
-export interface IBoardLine {
+interface IBoardLine {
     lineId: string
     nodeIds: string[]
 }
 
-export interface IBoardGraph {
+interface IBoardGraph {
     readonly nodes: IBoardNode[]
     readonly edges: Record<string, string[]>
     readonly lines: IBoardLine[]
     readonly pieces: IPieceNode[]
     readonly rows: number
     readonly cols: number
-    readonly cellSize: number
 
     /**
      * check can move from the node to other node by nodeId
@@ -31,12 +30,6 @@ export interface IBoardGraph {
      * @param toNodeId to nodeId
      */
     canMove(fromNodeId: string, toNodeId: string): boolean
-
-    /**
-     * Convert from row and col positions of a node to pixel positions
-     * @param nodeId 
-     */
-    convertNodeToPixel(nodeId: string): { x: number, y: number }
 
     /**
      * find a node by nodeId
@@ -64,7 +57,7 @@ export interface IBoardGraph {
      * @param nodeIdB nodeId B
      */
     getCommonLine(nodeIdA: string, nodeIdB: string): IBoardLine | undefined
-    
+
     /**
      * get a piece by nodeId has attached to that element
      * @param nodeId 
@@ -77,7 +70,7 @@ export interface IBoardGraph {
      * @returns true if success, otherwise false
      */
     removePieceById(pieceId: string): void
-    
+
     /**
      * Check if one node can capture another node
      * @param pieceIdA pieceId of the capture node

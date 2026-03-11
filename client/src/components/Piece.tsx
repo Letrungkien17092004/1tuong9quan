@@ -24,7 +24,7 @@ export default function Piece({ pos, r, stroke, side, isKing, onClick, isClicked
         >
             <circle
                 r={r}
-                stroke={isClicked ? (side === "green" ? "#006400" : "#00008B") : "black"}
+                stroke={isClicked ? (side === "green" ? "#f56f42" : "#f56f42") : "white"}
                 strokeWidth={isClicked ? stroke * 2 : stroke}
                 className="transition-all duration-200"
             />

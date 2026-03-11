@@ -1,7 +1,7 @@
 import HomePage from "./HomePage.tsx";
-import PlayPvPOffline from "./PlayPvPOffline.tsx";
+import PlayOffline from "./PlayOffline.tsx";
 
 export {
     HomePage,
-    PlayPvPOffline
+    PlayOffline
 }

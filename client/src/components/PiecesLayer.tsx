@@ -1,5 +1,4 @@
 import Piece from "./Piece"
-import type { IPieceNode } from "../types/index.ts"
 
 interface PiecesLayerProps {
     cellSize: number,

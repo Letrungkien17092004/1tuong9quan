@@ -17,7 +17,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
                 y1={-offset + cellSize * row - stroke}
                 x2={-offset + (5 - 1) * cellSize}
                 y2={-offset + row * cellSize - stroke}
-                stroke="black"
+                stroke="white"
                 strokeWidth={stroke}
             />
             )
@@ -28,7 +28,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
                 y1={offset + cellSize * row}
                 x2={-offset + (5 - 1) * cellSize}
                 y2={offset + row * cellSize}
-                stroke="black"
+                stroke="white"
                 strokeWidth={stroke}
             />
             )
@@ -44,7 +44,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
                 y1={offset}
                 x2={-offset + col * cellSize}
                 y2={-offset + (5 - 1) * cellSize - stroke}
-                stroke="black"
+                stroke="white"
                 strokeWidth={stroke}
             />
             )
@@ -55,7 +55,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
                 y1={offset}
                 x2={offset + col * cellSize}
                 y2={-offset + (5 - 1) * cellSize - stroke}
-                stroke="black"
+                stroke="white"
                 strokeWidth={stroke}
             />
             )
@@ -69,7 +69,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
         y1={offset}
         x2={(5 - 1) * cellSize - stroke - offset + 1} // +1 and -1 are offset compensations
         y2={(5 - 1) * cellSize - stroke - offset - 1}
-        stroke="black"
+        stroke="white"
         strokeWidth={stroke}
     />
     )
@@ -81,7 +81,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
         y1={(5 - 1) * cellSize - stroke - offset - 1}
         x2={(5 - 1) * cellSize - offset + 1} // +1 and -1 are offset compensations
         y2={offset}
-        stroke="black"
+        stroke="white"
         strokeWidth={stroke}
     />
     )
@@ -94,7 +94,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
         y1={offset + (5 - 2 - 1) * cellSize}
         x2={offset + (5 - 2 - 1) * cellSize}
         y2={offset}
-        stroke="black"
+        stroke="white"
         strokeWidth={stroke}
     />
     )
@@ -105,7 +105,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
         y1={-offset + (5 - 2 - 1) * cellSize + (cellSize * 2) - 1}
         x2={-offset + (5 - 2 - 1) * cellSize + (cellSize * 2) + 1}
         y2={-offset + (cellSize * 2) + 1}
-        stroke="black"
+        stroke="white"
         strokeWidth={stroke}
     />
     )
@@ -116,7 +116,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
         y1={offset + (5 - 2 - 1) * cellSize}
         x2={-offset + (cellSize * 2) + 2}
         y2={-offset + (5 - 2 - 1) * cellSize + (cellSize * 2) - 1}
-        stroke="black"
+        stroke="white"
         strokeWidth={stroke}
     />
     )
@@ -127,7 +127,7 @@ export default function BoardGrid({ cellSize, offset, stroke }: BoardGridProps) 
         y1={offset}
         x2={-offset + (5 - 2 - 1) * cellSize + (cellSize * 2) + 1}
         y2={-offset + (cellSize * 2) + 1}
-        stroke="black"
+        stroke="white"
         strokeWidth={stroke}
     />
     )

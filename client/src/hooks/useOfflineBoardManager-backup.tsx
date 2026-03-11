@@ -1,20 +1,115 @@
-import type { IBoardNode, IPieceNode, IBoardLine, IBoardGraph } from "../types/index.ts"
+import { useCallback, useRef, useState } from 'react'
 
-export default class BoardGraphService implements IBoardGraph {
+interface IBoardNode {
+    nodeId: string
+    row: number
+    col: number
+}
+
+interface IPieceNode {
+    pieceId: string
+    side: "green" | "blue"
+    isKing: boolean
+    nodeId: string
+}
+
+interface IBoardLine {
+    lineId: string
+    nodeIds: string[]
+}
+
+interface IBoardGraph {
+    readonly nodes: IBoardNode[]
+    readonly edges: Record<string, string[]>
+    readonly lines: IBoardLine[]
+    readonly pieces: IPieceNode[]
+    readonly rows: number
+    readonly cols: number
+
+    /**
+     * check can move from the node to other node by nodeId
+     * @param fromNodeId from nodeId
+     * @param toNodeId to nodeId
+     */
+    canMove(fromNodeId: string, toNodeId: string): boolean
+
+    /**
+     * find a node by nodeId
+     * @param nodeId 
+     */
+    getNodeFromId(nodeId: string): IBoardNode | undefined
+
+    /**
+     * find a piece by the pieceId
+     * @param pieceId 
+     */
+    getPieceById(pieceId: string): IPieceNode | undefined
+
+    /**
+     * Move a piece
+     * @param fromPieceId 
+     * @param toNodeId 
+     * @returns 
+     */
+    attemptMove(fromPieceId: string, toNodeId: string): void
+
+    /**
+     * get common line betwwen two nodes
+     * @param nodeIdA nodeId A
+     * @param nodeIdB nodeId B
+     */
+    getCommonLine(nodeIdA: string, nodeIdB: string): IBoardLine | undefined
+
+    /**
+     * get a piece by nodeId has attached to that element
+     * @param nodeId 
+     */
+    getPieceByNodeId(nodeId: string): IPieceNode | undefined
+
+    /**
+     * Remove a piece by pieceId
+     * @param pieceId 
+     * @returns true if success, otherwise false
+     */
+    removePieceById(pieceId: string): void
+
+    /**
+     * Check if one node can capture another node
+     * @param pieceIdA pieceId of the capture node
+     * @param pieceIdB pieceId of the node will be captured
+     */
+    canCapture(pieceIdA: string, pieceIdB: string): boolean
+
+    /**
+     * Capture a piece
+     * # include following way:
+     * - check can capture
+     * - remove piece will be captured
+     * - move piece canture to new position (asign new nodeId)
+     * 
+     * @param pieceIdA 
+     * @param pieceIdB 
+     * @returns 
+     */
+    tryCapturePiece(pieceIdA: string, pieceIdB: string): boolean
+
+}
+
+
+
+class BoardGraphService implements IBoardGraph {
     readonly nodes: IBoardNode[]
     readonly edges: Record<string, string[]>
     readonly lines: IBoardLine[]
     pieces: IPieceNode[]
     readonly rows: number = 5
     readonly cols: number = 5
-    readonly cellSize: number
 
-    constructor(cellSize: number) {
+    constructor() {
         this.nodes = []
         this.edges = {}
         this.lines = []
         this.pieces = []
-        this.cellSize = cellSize
 
         // create node with nodeId such as: A0, A01, B0, B1...
         // create each row one by one
@@ -304,21 +399,6 @@ export default class BoardGraphService implements IBoardGraph {
     }
 
     /**
-     * Convert from row and col positions of a node to pixel positions
-     * @param nodeId 
-     */
-    convertNodeToPixel(nodeId: string): { x: number, y: number } {
-        const node = this.getNodeFromId(nodeId)
-        if (node) {
-            return {
-                x: node.col * this.cellSize,
-                y: node.row * this.cellSize
-            }
-        }
-        throw new Error("invalid nodeId")
-    }
-
-    /**
      * find a node by nodeId
      * @param nodeId 
      */
@@ -470,4 +550,73 @@ export default class BoardGraphService implements IBoardGraph {
         return true
     }
 
+}
+
+export default function useOfflineBoardManager() {
+    const engineRef = useRef<IBoardGraph>(new BoardGraphService())
+    const [nodes] = useState<IBoardNode[]>([...engineRef.current.nodes])
+    const [pieces, setPieces] = useState<IPieceNode[]>([...engineRef.current.pieces])
+    const [selectedPieceId, setSelectedPieceId] = useState<string | undefined>(undefined)
+    const [currentTurn, setCurrentTurn] = useState<"blue" | "green">("blue")
+    const [isSelectKing, setIsSelectKing] = useState<boolean>(false)
+
+    const attemptMove = useCallback((desNodeId: string) => {
+        if (!selectedPieceId) { return }
+        console.log(selectedPieceId)
+        engineRef.current.attemptMove(selectedPieceId, desNodeId)
+
+        // change turn
+        if (currentTurn === "blue") {
+            setCurrentTurn("green")
+        } else {
+            setCurrentTurn("blue")
+        }
+        // refesh nodes state
+        setPieces([...engineRef.current.pieces])
+        // refesh selected piece
+        setSelectedPieceId(undefined)
+        console.log("done move")
+    }, [selectedPieceId, currentTurn])
+
+    const tryCapturePiece = useCallback((desPieceId: string) => {
+        if (!selectedPieceId) { return }
+        const captureStatus = engineRef.current.tryCapturePiece(selectedPieceId, desPieceId)
+        console.log("captureStatus ", captureStatus)
+
+        // change turn
+        if (currentTurn === "blue") {
+            setCurrentTurn("green")
+        } else {
+            setCurrentTurn("blue")
+        }
+
+        // refesh selected piece
+        setSelectedPieceId(undefined)
+        setPieces([...engineRef.current.pieces])
+    }, [selectedPieceId])
+
+    const selectPiece = useCallback((pieceId: string) => {
+        const found = engineRef.current.pieces.find(_piece => _piece.pieceId === pieceId)
+        if (!found) { throw new Error("invalid pieceId, piece was not found") }
+        if (found.side !== currentTurn) { return }
+        // unclick if previous piece == current piece
+        if (selectedPieceId === found.pieceId) {
+            setIsSelectKing(found.isKing)
+            setSelectedPieceId(undefined)
+        } else {
+            setIsSelectKing(found.isKing)
+            setSelectedPieceId(pieceId)
+        }
+    }, [selectedPieceId, isSelectKing, currentTurn])
+
+    return {
+        nodes,
+        pieces,
+        selectedPieceId,
+        attemptMove,
+        selectPiece,
+        isSelectKing,
+        tryCapturePiece,
+        currentTurn
+    }
 }
