@@ -45,7 +45,7 @@ export default function RenderBoard({
 
     return <>
         <div className="w-full">
-            <div className="w-5/10 my-0 mx-auto flex justify-center items-center">
+            <div className="my-0 mx-auto flex justify-center items-center">
                 <svg className='overflow-visible p-1 shadow-2xl' width={width} height={height}>
                     <BoardGrid
                         cellSize={cellSize}

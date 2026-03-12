@@ -80,14 +80,28 @@ export default function PlayOffline() {
 
     // resize board when device resize
     useEffect(() => {
-        let cellSize = 80
+        let deviceOffsetScreen = 5
+        let cellSize = 60
         let offset = 2
         let stroke = 2
-        // if (width < 431) {
-        //     cellSize = 50
-        //     offset = 50
-        // }
-
+        if (width <= 344 + deviceOffsetScreen) { // small mobile
+            cellSize = 70
+        } else if (width <= 430 + deviceOffsetScreen) { // 6.7 inch mobile
+            cellSize = 80
+        } else if (width <= 540 + deviceOffsetScreen) { // suface
+            cellSize = 80
+        } else if (width <= 768 + deviceOffsetScreen) { // ipad mini
+            cellSize = 120
+        } else if (width <= 820 + deviceOffsetScreen) { // ipad air
+            cellSize = 150
+        } else if (width <= 1024 + deviceOffsetScreen) { // ipad pro
+            cellSize = 120
+        } else if (width <= 1250 + deviceOffsetScreen) {
+            cellSize = 80
+        } else {
+            cellSize = 80
+        }
+        console.log(`size ${cellSize} offset ${offset}`)
         setBoardSize({
             cellSise: cellSize,
             offset: offset,
@@ -204,34 +218,51 @@ export default function PlayOffline() {
 
         }
     }, [selectedId, gameEngine.canMove, gameEngine.move])
+
+    // reset game event handler
+    const onReset = useCallback((e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        gameEngine.reset()
+        setCurrentTurn("blue")
+    }, [gameEngine.reset])
+
     return (<>
         <div className="w-screen h-screen bg-[#050811]">
             <InGameHeader />
-            <InGameMenu />
-            <MatchInfo
-                remainingBlue={gameEngine.remainingBlue}
-                remainingGreen={gameEngine.remainingGreen}
-                currentTurn={currentTurn}
-            />
-            <div className="w-full pt-10">
-                <RenderBoard
-                    cellSize={boardSize.cellSise}
-                    width={boardSize.width}
-                    height={boardSize.height}
-                    offset={boardSize.offset}
-                    stroke={boardSize.stroke}
-                    nodesToRender={nodesToRender}
-                    piecesToRender={piecesToRender}
-                    nodeClickFactory={createClickNodeEventHandler}
-                    pieceClickFactory={createClickPieceEventHandler}
-                />
+            <InGameMenu replayHandler={onReset} />
+            <div className="grid grid-cols-12 p-10">
+                <div className=" col-span-12 lg:col-span-2">
+                    <MatchInfo
+                        remainingBlue={gameEngine.remainingBlue}
+                        remainingGreen={gameEngine.remainingGreen}
+                        currentTurn={currentTurn}
+                    />
+
+                </div>
+                <div className=" col-span-12 lg:col-span-10">
+                    <div className="w-full pt-10">
+                        <RenderBoard
+                            cellSize={boardSize.cellSise}
+                            width={boardSize.width}
+                            height={boardSize.height}
+                            offset={boardSize.offset}
+                            stroke={boardSize.stroke}
+                            nodesToRender={nodesToRender}
+                            piecesToRender={piecesToRender}
+                            nodeClickFactory={createClickNodeEventHandler}
+                            pieceClickFactory={createClickPieceEventHandler}
+                        />
+                    </div>
+                </div>
             </div>
 
             {
-                gameEngine.isDone && gameEngine.winner && <GameResultOverlay winner={gameEngine.winner}/>
+                gameEngine.isDone &&
+                gameEngine.winner &&
+                <GameResultOverlay onReset={onReset} winner={gameEngine.winner} />
             }
-
-                {/* <GameResultOverlay winner={"blue"}/> */}
         </div>
     </>)
 }

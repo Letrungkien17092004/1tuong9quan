@@ -45,6 +45,8 @@ export interface IGameEngine {
     getLineBetween(nodeIdA: string, nodeIdB: string): ILine | undefined
 
     removePieceById(pieceId: string): void
+
+    resetPiece(): void
 }
 
 class GameEngine implements IGameEngine {
@@ -149,6 +151,8 @@ class GameEngine implements IGameEngine {
      * Set up pieces
      */
     private setupInitialPieces() {
+
+        this.pieces = []
 
         const greenNodes = [
             "A0", "A1", "A2", "A3", "A4",
@@ -351,6 +355,13 @@ class GameEngine implements IGameEngine {
             throw new Error("remove piece failure")
         }
     }
+
+    /**
+     * Start new game
+     */
+    resetPiece(): void {
+        this.setupInitialPieces()
+    }
 }
 
 export default function useOfflineBoardManager() {
@@ -366,6 +377,14 @@ export default function useOfflineBoardManager() {
     const [isDone, setIsDone] = useState<boolean>(false)
     const [winner, setWinner] = useState<"blue" | "green" | undefined>(undefined)
 
+    const reset = useCallback(() => {
+        engineRef.current.resetPiece()
+        setIsDone(false)
+        setWinner(undefined)
+        setPieces([...engineRef.current.pieces])
+        setRemainingBlue(10)
+        setRemainingGreen(10)
+    }, [])
 
     const move = useCallback((pieceId: string, nodeId: string) => {
 
@@ -441,6 +460,8 @@ export default function useOfflineBoardManager() {
         remainingBlue,
         remainingGreen,
         isDone,
-        winner
+        winner,
+
+        reset
     }
 }
