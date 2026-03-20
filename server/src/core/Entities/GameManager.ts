@@ -20,6 +20,7 @@ export default class GameManager implements IGameManager {
     totalBluePiece = 10
     totalGreenPiece = 10
     isDone = false
+    gameStatus: "idle" | "playing" | "disconnect" = "idle" // tôi thêm trạng thái game trong đó "disconnect" tức là người chơi bị mất kết nối
 
     constructor(playerAId: string, playerBId: string, gameId: string) {
         this.gameEngine = new GameEngine()

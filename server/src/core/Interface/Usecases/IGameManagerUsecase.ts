@@ -1,11 +1,11 @@
 import { GameManager } from "../../Entities/index.js"
 
-export default interface IGameManagerRepository {
+export default interface IGameManagerUsecase {
 
     create(playerAId: string, playerBId: string): GameManager
 
-    findByGameId(gameId: string): GameManager | undefined
-    findByPlayerId(playerId: string): GameManager | undefined
+    findByGameId(gameId: string): GameManager | null
+    findByPlayerId(playerId: string): GameManager | null
 
     getPlayersInGame(gameId: string): string[]
 
