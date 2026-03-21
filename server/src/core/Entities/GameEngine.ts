@@ -1,63 +1,32 @@
 
-export interface INode {
+export type Node = {
     nodeId: string
     row: number
     col: number
 }
 
-export interface IPiece {
+export type Piece = {
     pieceId: string
     side: "green" | "blue"
     isKing: boolean
     nodeId: string
 }
 
-export interface ILine {
+export type Line = {
     lineId: string
     nodeIds: string[]
 }
 
-export interface IGameEngine {
+export default class GameEngine {
 
-    readonly nodes: INode[]
-    readonly edges: Record<string, string[]>
-    readonly lines: ILine[]
-    readonly pieces: IPiece[]
+    nodes: Node[] = []
+    edges: Record<string, string[]> = {}
+    lines: Line[] = []
 
-    readonly rows: number
-    readonly cols: number
+    pieces: Piece[] = []
 
-    canMove(pieceId: string, toNodeId: string): boolean
-
-    canCapture(attackerId: string, targetId: string): boolean
-
-    move(pieceId: string, toNodeId: string): void
-
-    capture(attackerId: string, targetId: string): void
-
-    getNodeFromId(nodeId: string): INode | undefined
-
-    getPieceById(pieceId: string): IPiece | undefined
-
-    getPieceByNodeId(nodeId: string): IPiece | undefined
-
-    getLineBetween(nodeIdA: string, nodeIdB: string): ILine | undefined
-
-    removePieceById(pieceId: string): void
-
-    resetPiece(): void
-}
-
-export default class GameEngine implements IGameEngine {
-
-    readonly nodes: INode[] = []
-    readonly edges: Record<string, string[]> = {}
-    readonly lines: ILine[] = []
-
-    pieces: IPiece[] = []
-
-    readonly rows = 5
-    readonly cols = 5
+    rows = 5
+    cols = 5
 
     constructor() {
 
@@ -192,7 +161,7 @@ export default class GameEngine implements IGameEngine {
      * @param nodeId 
      * @returns 
      */
-    getNodeFromId(nodeId: string): INode | undefined {
+    getNodeFromId(nodeId: string): Node | undefined {
         return this.nodes.find(n => n.nodeId === nodeId)
     }
 
@@ -201,7 +170,7 @@ export default class GameEngine implements IGameEngine {
      * @param pieceId 
      * @returns 
      */
-    getPieceById(pieceId: string): IPiece | undefined {
+    getPieceById(pieceId: string): Piece | undefined {
         return this.pieces.find(p => p.pieceId === pieceId)
     }
 
@@ -210,7 +179,7 @@ export default class GameEngine implements IGameEngine {
      * @param nodeId 
      * @returns 
      */
-    getPieceByNodeId(nodeId: string): IPiece | undefined {
+    getPieceByNodeId(nodeId: string): Piece | undefined {
         return this.pieces.find(p => p.nodeId === nodeId)
     }
 
@@ -220,7 +189,7 @@ export default class GameEngine implements IGameEngine {
      * @param nodeIdB 
      * @returns 
      */
-    getLineBetween(nodeIdA: string, nodeIdB: string): ILine | undefined {
+    getLineBetween(nodeIdA: string, nodeIdB: string): Line | undefined {
         return this.lines.find(l =>
             l.nodeIds.includes(nodeIdA) &&
             l.nodeIds.includes(nodeIdB)
@@ -361,5 +330,14 @@ export default class GameEngine implements IGameEngine {
      */
     resetPiece(): void {
         this.setupInitialPieces()
+    }
+
+    clone(): GameEngine {
+        const copy = new GameEngine()
+        copy.nodes = [...this.nodes]
+        copy.pieces = [...this.pieces]
+        copy.edges = {...this.edges}
+        copy.lines = [...this.lines]
+        return copy
     }
 }

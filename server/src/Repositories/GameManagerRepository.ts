@@ -1,5 +1,5 @@
-import { IGameManagerRepository } from "../../core/Interface/Repositories/index.js";
-import { GameManager } from "../../core/Entities/index.js";
+import { IGameManagerRepository } from "../core/Interface/Repositories/index.js";
+import { GameManager } from "../core/Entities/index.js";
 
 export default class GameManagerRepository implements IGameManagerRepository {
 
@@ -29,20 +29,21 @@ export default class GameManagerRepository implements IGameManagerRepository {
     }
 
     findByGameId(gameId: string): GameManager | undefined {
-        return this.gameMap.get(gameId)
+        const result = this.gameMap.get(gameId)
+        return result ? result.clone() : undefined
     }
 
     findByPlayerId(playerId: string): GameManager | undefined {
 
         const gameId = this.playerToGame.get(playerId)
         if (!gameId) return undefined
-
-        return this.gameMap.get(gameId)
+        const gameManger = this.gameMap.get(gameId)
+        return gameManger ? gameManger.clone() : undefined
     }
 
     getPlayersInGame(gameId: string): string[] {
-
-        return this.gameToPlayers.get(gameId) ?? []
+        const results = this.gameToPlayers.get(gameId)
+        return results ?? []
     }
 
     setGameStatus(gameId: string, status: "idle" | "playing" | "disconnect"): void {

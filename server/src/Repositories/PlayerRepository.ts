@@ -1,5 +1,6 @@
-import { IPlayerRepository } from "../../core/Interface/Repositories/index.js";
-import { Player } from "../../core/Entities/index.js"
+import { IPlayerRepository } from "../core/Interface/Repositories/index.js";
+import { Player } from "../core/Entities/index.js"
+
 export default class PlayerRepository implements IPlayerRepository {
     private playerMap: Map<string, Player>
     private gameQueue: Array<Player>
@@ -36,7 +37,8 @@ export default class PlayerRepository implements IPlayerRepository {
      * @returns 
      */
     popPlayerFromQueue(): Player | undefined {
-        return this.gameQueue.pop()
+        const player = this.gameQueue.shift()
+        return player ? player.clone() : undefined
     }
 
     /**
@@ -53,7 +55,8 @@ export default class PlayerRepository implements IPlayerRepository {
      * @param playerId 
      */
     getPlayerById(playerId: string): Player | undefined {
-        return this.playerMap.get(playerId)
+        const player = this.playerMap.get(playerId)
+        return player ? player.clone() : undefined
     }
 
 }

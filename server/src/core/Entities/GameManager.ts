@@ -1,26 +1,19 @@
-import { GameEngine, IPiece } from "./index.js"
+import { GameEngine, Piece } from "./index.js"
 
 
-interface IGameManager {
-    canMove(pieceId: string, nodeId: string, playerId: string): boolean
-    canCapture(attackerId: string, targetId: string, playerId: string): boolean
-
-    move(pieceId: string, nodeId: string): void
-    capture(attackerId: string, targetId: string): void
-
-    getPieceState(): IPiece[]
-    nextTurn(): void
-}
-
-export default class GameManager implements IGameManager {
+export default class GameManager {
     private gameEngine: GameEngine
     private playerMappingSide: Map<string, "blue" | "green">
     private currentTurn: "blue" | "green" = "blue"
+    private playerAId: string
+    private playerBId: string
+
     gameId: string
     totalBluePiece = 10
     totalGreenPiece = 10
     isDone = false
-    gameStatus: "idle" | "playing" | "disconnect" = "idle" // tôi thêm trạng thái game trong đó "disconnect" tức là người chơi bị mất kết nối
+    gameStatus: "idle" | "playing" | "disconnect" = "idle"
+
 
     constructor(playerAId: string, playerBId: string, gameId: string) {
         this.gameEngine = new GameEngine()
@@ -29,6 +22,8 @@ export default class GameManager implements IGameManager {
             [playerBId, "green"]
         ])
         this.gameId = gameId
+        this.playerAId = playerAId
+        this.playerBId = playerBId
     }
 
     canMove(pieceId: string, nodeId: string, playerId: string): boolean {
@@ -66,7 +61,7 @@ export default class GameManager implements IGameManager {
         this.gameEngine.capture(attackerId, targetId)
     }
 
-    getPieceState(): IPiece[] {
+    getPieceState(): Piece[] {
         return [...this.gameEngine.pieces]
     }
 
@@ -78,6 +73,21 @@ export default class GameManager implements IGameManager {
         }
     }
 
+    clone() {
+        const copy = new GameManager(
+            this.playerAId,
+            this.playerBId,
+            this.gameId,
+        )
+        copy.gameEngine = this.gameEngine.clone()
+        copy.playerMappingSide = { ...this.playerMappingSide }
+        copy.currentTurn = this.currentTurn
+        copy.totalBluePiece = this.totalBluePiece
+        copy.totalGreenPiece = this.totalGreenPiece
+        copy.isDone = this.isDone
+        copy.gameStatus = this.gameStatus
 
+        return copy
+    }
 
 }
