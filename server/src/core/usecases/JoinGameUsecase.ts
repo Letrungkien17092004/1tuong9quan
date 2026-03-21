@@ -1,5 +1,5 @@
-import { IGameManagerRepository } from "../Interface/Repositories/index.js";
-import { Player, GameManager } from "../Entities/index.js"
+import { IGameManagerRepository } from "../interface/repositories/index.js";
+import { Player, GameManager } from "../entities/index.js"
 
 export default class JoinGameUsecase {
     private gameManagerRepo: IGameManagerRepository

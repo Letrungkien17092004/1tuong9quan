@@ -1,4 +1,4 @@
-import { GameManager } from "../../Entities/index.js"
+import { GameManager } from "../../entities/index.js"
 
 export default interface IGameManagerRepository {
 

@@ -1,4 +1,4 @@
-import { IPlayerRepository,  IGameManagerRepository} from "../Interface/Repositories/index.js";
+import { IPlayerRepository,  IGameManagerRepository} from "../interface/repositories/index.js";
 
 export default class CheckPlayerInGameUsecase {
     private gameManagerRepo: IGameManagerRepository

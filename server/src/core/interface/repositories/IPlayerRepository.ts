@@ -1,4 +1,4 @@
-import { Player } from "../../Entities/index.js"
+import { Player } from "../../entities/index.js"
 
 export default interface IPlayerRepository {
     generatePLayer(): Player

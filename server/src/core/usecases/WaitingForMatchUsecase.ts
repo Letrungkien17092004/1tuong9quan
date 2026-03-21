@@ -1,4 +1,4 @@
-import { IPlayerRepository } from "../Interface/Repositories";
+import { IPlayerRepository } from "../interface/repositories";
 
 
 export default class WaitingForMatchUsecase {

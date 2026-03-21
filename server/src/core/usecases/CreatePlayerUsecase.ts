@@ -1,5 +1,5 @@
-import { IPlayerRepository } from "../Interface/Repositories/index.js";
-import { Player } from "../Entities/index.js"
+import { IPlayerRepository } from "../interface/repositories/index.js";
+import { Player } from "../entities/index.js"
 
 export default class ICreatePlayerRepository {
     private repo: IPlayerRepository

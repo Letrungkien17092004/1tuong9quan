@@ -1,5 +1,5 @@
-import { IPlayerRepository } from "../core/Interface/Repositories/index.js";
-import { Player } from "../core/Entities/index.js"
+import { IPlayerRepository } from "../core/interface/repositories/index.js";
+import { Player } from "../core/entities/index.js"
 
 export default class PlayerRepository implements IPlayerRepository {
     private playerMap: Map<string, Player>

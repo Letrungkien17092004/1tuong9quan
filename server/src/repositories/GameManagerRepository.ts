@@ -1,5 +1,5 @@
-import { IGameManagerRepository } from "../core/Interface/Repositories/index.js";
-import { GameManager } from "../core/Entities/index.js";
+import { IGameManagerRepository } from "../core/interface/repositories/index.js";
+import { GameManager } from "../core/entities/index.js";
 
 export default class GameManagerRepository implements IGameManagerRepository {
 
