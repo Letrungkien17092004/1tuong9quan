@@ -11,7 +11,7 @@ export default class PlayerController {
 
     create = async (req: Request, res: Response): Promise<void> => {
         try {
-            const newPlayer = this.createPlayerUsecase.excute()
+            const newPlayer = await this.createPlayerUsecase.excute()
             res.status(201).json({
                 player: newPlayer
             })
