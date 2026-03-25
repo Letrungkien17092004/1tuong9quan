@@ -12,13 +12,13 @@ export default class FindOpponentUsecase {
      * get an opponent from Waiting queue, if no have then push to waiting queue
      * @returns 
      */
-    async excute(socketId: string, playerId: string): Promise<WaitingQueueItem | undefined> {
+    async excute(options: { socketId: string, playerId: string }): Promise<WaitingQueueItem | undefined> {
         const opponent = await this.waitingQueueRepo.getFirst()
         if (opponent) {
             return opponent
         }
 
-        this.waitingQueueRepo.pushItem(socketId, playerId)
+        await this.waitingQueueRepo.pushItem(options.socketId, options.playerId)
         return undefined
     }
 }

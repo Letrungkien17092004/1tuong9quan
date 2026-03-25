@@ -1,42 +1,33 @@
-import { error } from "console";
 import { Server, Socket } from "socket.io";
+import { FindMatchListener } from "../listeners/index.js";
+import { GetPlayerByIdUsecase, FindOpponentUsecase, CreateMatchUsecase } from "../../core/usecases/index.js"
+import { playerRepo, matchRepo, waitingQueueItemRepo } from "../../containers.js";
 
 
 type SocketPlayer = {
     socketId: string
-} 
+}
 
 export default function playerSocket(io: Server) {
     const playerNamespace = io.of('/player')
     const waitingQueue: Array<SocketPlayer> = []
 
     playerNamespace.on("connection", (socket: Socket) => {
-        console.log("new user connect to ", socket.nsp.name, " namespace")
+        const getPlayerByIdUsecase = new GetPlayerByIdUsecase(playerRepo)
+        const findOppponentUsecase = new FindOpponentUsecase(waitingQueueItemRepo)
+        const createMatchUsecase = new CreateMatchUsecase(matchRepo)
 
-        socket.on("find-match", (data) => {
-            console.log("new msg on find-match")
-            console.log(data)
-            const opponent = waitingQueue.shift()
-            if (opponent) {
-                console.log("run here 1")
-                const roomId = crypto.randomUUID()
-                socket.join(roomId)
-                playerNamespace.to(opponent.socketId).socketsJoin(roomId)
-                playerNamespace.to(roomId).emit("find-match", "match-found")
-            } else {
-                console.log("run here 2")
-                waitingQueue.push({
-                    socketId: socket.id
-                })
-                socket.emit("waiting")
-            }
+        const findMatchListener = new FindMatchListener({
+            ioNamespace: playerNamespace,
+            socket: socket,
+            eventName: "player:find-match",
+            getPlayerUsecase: getPlayerByIdUsecase,
+            findOpponentUsecase: findOppponentUsecase,
+            createMatchUsecase: createMatchUsecase
         })
 
-        socket.on("test", (payload, callback) => {
-            console.log("received ", payload)
-            callback("ok") 
-        })
+        socket.on("player:find-match", findMatchListener.listener)
     })
 
-    
+
 }

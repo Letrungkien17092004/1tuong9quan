@@ -1,63 +1,88 @@
-import { Socket } from "socket.io";
+import { Socket, Namespace } from "socket.io";
 import z from "zod";
-import { GetPlayerByIdUsecase, FindOpponentUsecase } from "../../core/usecases/index.js";
+import { GetPlayerByIdUsecase, FindOpponentUsecase, CreateMatchUsecase } from "../../core/usecases/index.js";
 
-const argsSchema = z.object({
-    playerId: z.string().min(1),
+const PayloadSchema = z.object({
+    playerId: z.string().min(1)
 });
 
-type WaitingQueueItem = {
-    playerId: string
-    socketId: StringConstructor
-}
 
 export default class FindMatchListener {
+    private ioNamespace: Namespace
     private socket: Socket
-    private waitingQueue: WaitingQueueItem[] = []
     private eventName: string
     private getPlayerUsecase: GetPlayerByIdUsecase
     private findOpponentUsecase: FindOpponentUsecase
+    private createMatchUsecase: CreateMatchUsecase
 
     constructor(options: {
+        ioNamespace: Namespace,
         socket: Socket,
         eventName: string,
-        getPlayerUsecase: GetPlayerByIdUsecase
-        findOpponentUsecase: FindOpponentUsecase
+        getPlayerUsecase: GetPlayerByIdUsecase,
+        findOpponentUsecase: FindOpponentUsecase,
+        createMatchUsecase: CreateMatchUsecase
     }) {
+        this.ioNamespace = options.ioNamespace
         this.socket = options.socket
         this.eventName = options.eventName
         this.getPlayerUsecase = options.getPlayerUsecase
         this.findOpponentUsecase = options.findOpponentUsecase
+        this.createMatchUsecase = options.createMatchUsecase
 
     }
 
-    factory = async (playerId: unknown, callback: unknown) => {
+    listener = async (payload: unknown, callback: unknown) => {
         try {
-            const argsParsed = argsSchema.parse({
-                playerId: playerId
-            });
+            const validPayload = PayloadSchema.parse(payload);
 
-            const player = this.getPlayerUsecase.excute(argsParsed.playerId)
+            const player = await this.getPlayerUsecase.excute(validPayload.playerId)
             if (!player) {
                 this.socket.emit(this.eventName, {
                     status: "error",
                     message: "Unauthorized"
                 })
+
+                if (typeof callback === "function") {
+                    callback({ status: "success" });
+                }
                 return
             }
 
-            const opponent = this.waitingQueue.shift()
+            const opponent = await this.findOpponentUsecase.excute({
+                socketId: this.socket.id,
+                playerId: validPayload.playerId
+            })
             if (!opponent) {
                 this.socket.emit(this.eventName, {
                     status: "ok",
                     message: "waiting"
                 })
+
+                if (typeof callback === "function") {
+                    callback({ status: "success" });
+                }
                 return
             }
-            this.waitingQueue.push({
-                socketId: this.socket.id,
 
-            })
+            const match = await this.createMatchUsecase.excute()
+            this.socket.emit(
+                this.eventName,
+                {
+                    status: "ok",
+                    message: "match found",
+                    matchId: match.matchId
+                }
+            )
+            this.ioNamespace.to(opponent.socketId).emit(
+                this.eventName,
+                {
+                    status: "ok",
+                    message: "match found",
+                    matchId: match.matchId
+                }
+            )
+
             if (typeof callback === "function") {
                 callback({ status: "success" });
             }

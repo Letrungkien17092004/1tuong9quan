@@ -3,10 +3,12 @@ import CreatePlayerUsecase from "./CreatePlayerUsecase.js"
 import CreateGameUsecase from "./CreateGameUsecase.js";
 import GetPlayerByIdUsecase from "./GetPlayerByIdUsecase.js";
 import FindOpponentUsecase from "./FindOpponentUsecase.js";
+import CreateMatchUsecase from "./CreateMatchUsecase.js";
 export {
     CheckPlayerInGameUsecase,
     CreatePlayerUsecase,
     CreateGameUsecase,
     GetPlayerByIdUsecase,
-    FindOpponentUsecase
+    FindOpponentUsecase,
+    CreateMatchUsecase
 }
