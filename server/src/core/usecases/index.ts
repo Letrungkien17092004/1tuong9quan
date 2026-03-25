@@ -1,13 +1,12 @@
 import CheckPlayerInGameUsecase from "./CheckPlayerInGameUsecase.js";
 import CreatePlayerUsecase from "./CreatePlayerUsecase.js"
-import FindCompetitorUsecase from "./FindCompetitorUsecase.js";
-import JoinGameUsecase from "./JoinGameUsecase.js";
-import WaitingForMatchUsecase from "./WaitingForMatchUsecase.js";
-
+import CreateGameUsecase from "./CreateGameUsecase.js";
+import GetPlayerByIdUsecase from "./GetPlayerByIdUsecase.js";
+import FindOpponentUsecase from "./FindOpponentUsecase.js";
 export {
     CheckPlayerInGameUsecase,
     CreatePlayerUsecase,
-    FindCompetitorUsecase,
-    JoinGameUsecase,
-    WaitingForMatchUsecase
+    CreateGameUsecase,
+    GetPlayerByIdUsecase,
+    FindOpponentUsecase
 }

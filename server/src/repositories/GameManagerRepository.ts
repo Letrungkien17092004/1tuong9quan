@@ -8,7 +8,7 @@ export default class GameManagerRepository implements IGameManagerRepository {
     private gameToPlayers: Map<string, string[]> = new Map()
 
 
-    create(playerAId: string, playerBId: string): GameManager {
+    async create(playerAId: string, playerBId: string): Promise<GameManager> {
 
         if (this.playerToGame.has(playerAId) || this.playerToGame.has(playerBId)) {
             throw new Error("player already in a game")
@@ -25,15 +25,15 @@ export default class GameManagerRepository implements IGameManagerRepository {
 
         this.gameToPlayers.set(gameId, [playerAId, playerBId])
 
-        return game
+        return game.clone()
     }
 
-    findByGameId(gameId: string): GameManager | undefined {
+    async findByGameId(gameId: string): Promise<GameManager | undefined> {
         const result = this.gameMap.get(gameId)
         return result ? result.clone() : undefined
     }
 
-    findByPlayerId(playerId: string): GameManager | undefined {
+    async findByPlayerId(playerId: string): Promise<GameManager | undefined> {
 
         const gameId = this.playerToGame.get(playerId)
         if (!gameId) return undefined
@@ -41,12 +41,12 @@ export default class GameManagerRepository implements IGameManagerRepository {
         return gameManger ? gameManger.clone() : undefined
     }
 
-    getPlayersInGame(gameId: string): string[] {
+    async getPlayersInGame(gameId: string): Promise<string[]> {
         const results = this.gameToPlayers.get(gameId)
         return results ?? []
     }
 
-    setGameStatus(gameId: string, status: "idle" | "playing" | "disconnect"): void {
+    async setGameStatus(gameId: string, status: "idle" | "playing" | "disconnect"): Promise<void> {
 
         const game = this.gameMap.get(gameId)
         if (!game) throw new Error("game not found")
@@ -54,7 +54,7 @@ export default class GameManagerRepository implements IGameManagerRepository {
         game.gameStatus = status
     }
 
-    removeGame(gameId: string): void {
+    async removeGame(gameId: string): Promise<void> {
 
         const players = this.gameToPlayers.get(gameId) ?? []
 

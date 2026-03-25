@@ -3,58 +3,29 @@ import { Player } from "../core/entities/index.js"
 
 export default class PlayerRepository implements IPlayerRepository {
     private playerMap: Map<string, Player>
-    private gameQueue: Array<Player>
     private playerCount = 1
 
     constructor() {
         this.playerMap = new Map()
-        this.gameQueue = []
     }
     /**
      * generate a new  player then set to playerMap
      * @returns 
      */
-    generatePLayer(): Player {
+    async generatePLayer(): Promise<Player> {
         const newPlayer = new Player(
             crypto.randomUUID(),
             `Ngươi chơi ${this.playerCount}`
         )
         this.playerCount++
         this.playerMap.set(newPlayer.playerId, newPlayer)
-        return newPlayer
+        return newPlayer.clone()
     }
-
-    /**
-     * push a player to gameQueue (waiting line)
-     * @param player 
-     */
-    pushToGameQueue(player: Player): void {
-        this.gameQueue.push(player)
-    }
-
-    /**
-     * pop a player from gameQueue
-     * @returns 
-     */
-    popPlayerFromQueue(): Player | undefined {
-        const player = this.gameQueue.shift()
-        return player ? player.clone() : undefined
-    }
-
-    /**
-     * check a player in gameQueue by playerId
-     * @param playerId 
-     * @returns 
-     */
-    isInQueue(playerId: string): boolean {
-        return this.gameQueue.some(item => item.playerId === playerId)
-    }
-
     /**
      * retrieve a player by id
      * @param playerId 
      */
-    getPlayerById(playerId: string): Player | undefined {
+    async getPlayerById(playerId: string): Promise<Player | undefined> {
         const player = this.playerMap.get(playerId)
         return player ? player.clone() : undefined
     }

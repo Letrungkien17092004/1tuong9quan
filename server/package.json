@@ -5,7 +5,8 @@
   "main": "index.js",
   "types": "module",
   "scripts": {
-    "dev": "npx tsx --watch ./src/server.ts"
+    "dev": "npx tsx --watch ./src/server.ts",
+    "test": "npx tsx --watch ./src/test_socket.ts"
   },
   "keywords": [],
   "author": "",
@@ -13,8 +14,12 @@
   "type": "commonjs",
   "dependencies": {
     "@types/express": "^5.0.6",
+    "@types/socket.io": "^3.0.1",
+    "@types/socket.io-client": "^1.4.36",
     "express": "^5.2.1",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

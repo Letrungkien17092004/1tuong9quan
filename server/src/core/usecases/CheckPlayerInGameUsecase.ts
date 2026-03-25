@@ -7,7 +7,7 @@ export default class CheckPlayerInGameUsecase {
         this.gameManagerRepo = gameManagerRepo
     }
 
-    excute(playerId: string): boolean {
+    async excute(playerId: string): Promise<boolean> {
         const game = this.gameManagerRepo.findByPlayerId(playerId)
         return game ? true : false
     }

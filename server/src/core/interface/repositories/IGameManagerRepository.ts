@@ -2,14 +2,14 @@ import { GameManager } from "../../entities/index.js"
 
 export default interface IGameManagerRepository {
 
-    create(playerAId: string, playerBId: string): GameManager
+    create(playerAId: string, playerBId: string): Promise<GameManager>
 
-    findByGameId(gameId: string): GameManager | undefined
-    findByPlayerId(playerId: string): GameManager | undefined
+    findByGameId(gameId: string): Promise<GameManager | undefined>
+    findByPlayerId(playerId: string): Promise<GameManager | undefined>
 
-    getPlayersInGame(gameId: string): string[]
+    getPlayersInGame(gameId: string): Promise<string[]>
 
-    setGameStatus(gameId: string, status: "idle" | "playing" | "disconnect"): void
+    setGameStatus(gameId: string, status: "idle" | "playing" | "disconnect"): Promise<void>
 
-    removeGame(gameId: string): void
+    removeGame(gameId: string): Promise<void>
 }
