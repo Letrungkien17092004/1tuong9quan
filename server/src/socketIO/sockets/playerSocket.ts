@@ -4,13 +4,8 @@ import { GetPlayerByIdUsecase, FindOpponentUsecase, CreateMatchUsecase } from ".
 import { playerRepo, matchRepo, waitingQueueItemRepo } from "../../containers.js";
 
 
-type SocketPlayer = {
-    socketId: string
-}
-
 export default function playerSocket(io: Server) {
     const playerNamespace = io.of('/player')
-    const waitingQueue: Array<SocketPlayer> = []
 
     playerNamespace.on("connection", (socket: Socket) => {
         const getPlayerByIdUsecase = new GetPlayerByIdUsecase(playerRepo)
