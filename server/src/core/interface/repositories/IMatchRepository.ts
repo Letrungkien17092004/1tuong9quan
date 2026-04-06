@@ -6,20 +6,19 @@ export default interface IMatchRepository {
         gameManager?: GameManager
         playerA?: Player
         playerB?: Player
-        status: "pending-join" | "playing" | "stop" | "done" | "break"
+        status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break"
     }): Promise<Match>
 
     findById(matchId: string): Promise<Match | undefined>
 
-    updatePlayer(matchId: string, players: {
-        playerA?: Player,
-        playerB?: Player
-    }): Promise<void>
-
-    updateStatus(
-        matchId: string,
-        status: "pending-join" | "playing" | "stop" | "done" | "break"
-    ): Promise<void>
+    update(matchId: string, data: {
+        gameManager?: GameManager,
+        bluePlayer?: Player,
+        greenPlayer?: Player,
+        status?: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break",
+        bluePlayerStatus?: "pending-join" | "joined" | "playing" | "disconnect",
+        greenPlayerStatus?: "pending-join" | "joined" | "playing" | "disconnect"
+    }): Promise<Match>
 
     delete(matchId: string): Promise<void>
 

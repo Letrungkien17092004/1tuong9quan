@@ -1,6 +1,6 @@
 import { Socket, Namespace } from "socket.io";
 import z from "zod";
-import { GetPlayerByIdUsecase, FindOpponentUsecase, CreateMatchUsecase } from "../../core/usecases/index.js";
+import { FindPlayerByIdUsecase, FindOpponentOrPushToQueueUsecase, CreateMatchUsecase } from "../../core/usecases/index.js";
 
 const PayloadSchema = z.object({
     playerId: z.string().min(1)
@@ -11,45 +11,45 @@ export default class FindMatchListener {
     private ioNamespace: Namespace
     private socket: Socket
     private eventName: string
-    private getPlayerUsecase: GetPlayerByIdUsecase
-    private findOpponentUsecase: FindOpponentUsecase
+    private findPlayerByIdUsecase: FindPlayerByIdUsecase
+    private findOpponentOrPushToQueueUsecase: FindOpponentOrPushToQueueUsecase
     private createMatchUsecase: CreateMatchUsecase
 
     constructor(options: {
         ioNamespace: Namespace,
         socket: Socket,
         eventName: string,
-        getPlayerUsecase: GetPlayerByIdUsecase,
-        findOpponentUsecase: FindOpponentUsecase,
+        findPlayerByIdUsecase: FindPlayerByIdUsecase,
+        findOpponentOrPushToQueueUsecase: FindOpponentOrPushToQueueUsecase,
         createMatchUsecase: CreateMatchUsecase
     }) {
         this.ioNamespace = options.ioNamespace
         this.socket = options.socket
         this.eventName = options.eventName
-        this.getPlayerUsecase = options.getPlayerUsecase
-        this.findOpponentUsecase = options.findOpponentUsecase
+        this.findPlayerByIdUsecase = options.findPlayerByIdUsecase
+        this.findOpponentOrPushToQueueUsecase = options.findOpponentOrPushToQueueUsecase
         this.createMatchUsecase = options.createMatchUsecase
 
     }
 
     listener = async (payload: unknown, callback: unknown) => {
         try {
+            if (typeof callback === "function") {
+                callback({ status: "received" });
+            }
             const validPayload = PayloadSchema.parse(payload);
 
-            const player = await this.getPlayerUsecase.excute(validPayload.playerId)
+            const player = await this.findPlayerByIdUsecase.excute(validPayload.playerId)
             if (!player) {
                 this.socket.emit(this.eventName, {
                     status: "error",
                     message: "Unauthorized"
                 })
 
-                if (typeof callback === "function") {
-                    callback({ status: "success" });
-                }
                 return
             }
 
-            const opponent = await this.findOpponentUsecase.excute({
+            const opponent = await this.findOpponentOrPushToQueueUsecase.excute({
                 socketId: this.socket.id,
                 playerId: validPayload.playerId
             })
@@ -58,10 +58,6 @@ export default class FindMatchListener {
                     status: "ok",
                     message: "waiting"
                 })
-
-                if (typeof callback === "function") {
-                    callback({ status: "success" });
-                }
                 return
             }
 
@@ -83,29 +79,31 @@ export default class FindMatchListener {
                 }
             )
 
-            if (typeof callback === "function") {
-                callback({ status: "success" });
-            }
-
         } catch (error) {
 
             if (error instanceof z.ZodError) {
                 console.error("Validation Error:", error.cause);
                 if (typeof callback === "function") {
-                    return callback({
+                    callback({
                         status: "error",
                         type: "VALIDATION_FAILED",
                         details: error.issues.map(e => e.message)
                     });
                 }
+
+                return
             }
-            console.error("System Error:", error);
-            if (typeof callback === "function") {
-                callback({
-                    status: "error",
-                    message: (error as Error).message
-                });
+
+            if (error instanceof Error) {
+                this.socket.emit(this.eventName, {
+                    message: error.message
+                })
+                return
             }
+            this.socket.emit(this.eventName, {
+                message: "unknow error",
+                error: error
+            })
         }
     };
 }

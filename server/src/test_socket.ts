@@ -7,7 +7,7 @@ const base_url = "http://localhost:3000"
 
 
 async function main() {
-    const socket = io(`${base_url}/player`)
+    const socket = io(`${base_url}/match`)
 
     socket.on("connect", () => {
         console.log("connected")

@@ -1,34 +1,60 @@
 import { GameManager, Player } from "./index.js"
-
+export type MatchState = {
+    status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break"
+    bluePlayerStatus: "pending-join" | "joined" | "playing" | "disconnect"
+    greenPlayerStatus: "pending-join" | "joined" | "playing" | "disconnect"
+}
 export default class Match {
     matchId: string
     gameManager?: GameManager
-    playerA?: Player
-    playerB?: Player
-    status: "pending-join" | "playing" | "stop" | "done" | "break" = "pending-join"
+    bluePlayer?: Player
+    greenPlayer?: Player
+    playerToSide: Map<string, "blue" | "green">
+    status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break" = "pending-join"
+    bluePlayerStatus: "pending-join" | "joined" | "playing" | "disconnect" = "pending-join"
+    greenPlayerStatus: "pending-join" | "joined" | "playing" | "disconnect" = "pending-join"
 
     constructor(options: {
         matchId: string
         gameManager?: GameManager
-        playerA?: Player
-        playerB?: Player
-        status: "pending-join" | "playing" | "stop" | "done" | "break"
+        bluePlayer?: Player
+        greenPlayer?: Player
+        status?: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break"
     }) {
         this.matchId = options.matchId
         this.gameManager = options.gameManager
-        this.playerA = options.playerA
-        this.playerB = options.playerB
-        this.status = options.status
+        this.playerToSide = new Map()
+        if (options.bluePlayer) {
+            this.bluePlayer = options.bluePlayer
+            this.playerToSide.set(options.bluePlayer.playerId, "blue")
+        }
+        if (options.greenPlayer) {
+            this.greenPlayer = options.greenPlayer
+            this.playerToSide.set(options.greenPlayer.playerId, "green")
+        }
+        this.status = options.status || "pending-join"
+    }
+
+    getState(): MatchState {
+        return {
+            status: this.status,
+            bluePlayerStatus: this.bluePlayerStatus,
+            greenPlayerStatus: this.greenPlayerStatus
+        }
     }
 
     clone(): Match {
         const copy = new Match({
             matchId: this.matchId,
             gameManager: this.gameManager?.clone(),
-            playerA: this.playerA?.clone(),
-            playerB: this.playerB?.clone(),
+            bluePlayer: this.bluePlayer?.clone(),
+            greenPlayer: this.greenPlayer?.clone(),
             status: this.status
         })
+
+        copy.bluePlayerStatus = this.bluePlayerStatus
+        copy.greenPlayerStatus = this.greenPlayerStatus
+        copy.playerToSide = new Map(this.playerToSide)
         return copy
     }
 }

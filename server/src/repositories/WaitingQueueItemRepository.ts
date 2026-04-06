@@ -17,8 +17,8 @@ export default class WaitingQueueItemRepository implements IWaitingQueueItemRepo
         this.queue = this.queue.filter(item => item.playerId !== playerId);
     }
 
-    async getFirst(): Promise<WaitingQueueItem | undefined> {
-        const result = this.queue[0];
+    async popItem(): Promise<WaitingQueueItem | undefined> {
+        const result = this.queue.shift();
         return result ? result.clone() : undefined
     }
 
