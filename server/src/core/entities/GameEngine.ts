@@ -260,7 +260,6 @@ export default class GameEngine {
         if (target.isKing) {
             const remainingPieceOfTarget = this.pieces.filter((piece) => piece.side === target.side && piece.isKing === false)
             if (remainingPieceOfTarget.length > 5) {
-                window.confirm("Chưa ăn đủ 4 quân")
                 return false
             }
         }

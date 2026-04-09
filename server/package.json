@@ -6,7 +6,8 @@
   "types": "module",
   "scripts": {
     "dev": "npx tsx --watch ./src/server.ts",
-    "test": "npx tsx ./src/test_socket.ts"
+    "test": "npx tsx ./src/test_socket.ts",
+    "test2": "npx tsx ./src/__tests__/manual/entities/manual_entities.test.ts"
   },
   "keywords": [],
   "author": "",
