@@ -16,40 +16,9 @@ export default class JoinMatchUsecase {
             throw new Error(`match wasn't found`)
         }
 
-        // if player has join
-        if (match.playerToSide.get(player.playerId)) {
-            throw new Error("player has join")
-        }
+        // Cập nhật player vào match (logic tạo gameManager khi đủ 2 players nằm trong repository)
+        match = await this.matchRepo.updatePlayer(matchId, player)
 
-        // Ghép người chơi vào match
-        if (!match.bluePlayer) {
-            // Người chơi đầu tiên là blue
-            match = await this.matchRepo.update(matchId, { bluePlayer: player, bluePlayerStatus: "joined"})
-        } else if (!match.greenPlayer) {
-            // Người chơi thứ hai là green
-            match = await this.matchRepo.update(matchId, { greenPlayer: player, greenPlayerStatus: "joined" })
-        } else {
-            throw new Error("Match is already full")
-        }
-
-        // Nếu match đã có đủ 2 người chơi
-        if (
-            match.bluePlayer &&
-            match.greenPlayer &&
-            match.bluePlayerStatus === "joined" && 
-            match.greenPlayerStatus === "joined"
-
-        ) {
-            // create gameManger
-            const gameManager = new GameManager(match.bluePlayer.playerId, match.greenPlayer.playerId)
-            // Cập nhật status match thành "playing" và player status thành "playing"
-            match = await this.matchRepo.update(matchId, {
-                gameManager: gameManager,
-                status: "playing",
-                bluePlayerStatus: "playing",
-                greenPlayerStatus: "playing"
-            })
-        }
         return match
     }
 }

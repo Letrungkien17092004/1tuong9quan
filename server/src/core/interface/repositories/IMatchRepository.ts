@@ -2,23 +2,15 @@ import { Match, GameManager, Player } from "../../entities/index.js";
 
 export default interface IMatchRepository {
 
-    create(options: {
-        gameManager?: GameManager
-        playerA?: Player
-        playerB?: Player
-        status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break"
-    }): Promise<Match>
+    create(): Promise<Match>
 
     findById(matchId: string): Promise<Match | undefined>
 
-    update(matchId: string, data: {
-        gameManager?: GameManager,
-        bluePlayer?: Player,
-        greenPlayer?: Player,
-        status?: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break",
-        bluePlayerStatus?: "pending-join" | "joined" | "playing" | "disconnect",
-        greenPlayerStatus?: "pending-join" | "joined" | "playing" | "disconnect"
-    }): Promise<Match>
+    updatePlayer(matchId: string, player: Player): Promise<Match>
+
+    setPlayerDisconnect(matchId: string, player: Player): Promise<Match>
+
+    getReferrence(matchId: string): Promise<Match | undefined>
 
     delete(matchId: string): Promise<void>
 

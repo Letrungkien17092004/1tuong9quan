@@ -4,15 +4,9 @@ import { Player, GameManager, Match } from "../core/entities/index.js"
 export default class MatchRepository implements IMatchRepository {
     private dataStore: Match[] = []
 
-    async create(options: {
-        gameManager?: GameManager,
-        playerA?: Player,
-        playerB?: Player,
-        status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break"
-    }): Promise<Match> {
+    async create(): Promise<Match> {
         const newMatch = new Match({
             matchId: crypto.randomUUID(),
-            ...options
         })
         this.dataStore.push(newMatch)
         return newMatch.clone()
@@ -23,36 +17,87 @@ export default class MatchRepository implements IMatchRepository {
         return result?.clone()
     }
 
-    async update(matchId: string, data: {
-        gameManager?: GameManager,
-        bluePlayer?: Player,
-        greenPlayer?: Player,
-        status?: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break",
-        bluePlayerStatus?: "pending-join" | "joined" | "playing" | "disconnect",
-        greenPlayerStatus?: "pending-join" | "joined" | "playing" | "disconnect"
-    }): Promise<Match> {
+    /**
+     * Add player to match (join match), if both player have joined then create game manager and set status to "playing"
+     * @param matchId 
+     * @param player 
+     * @returns 
+     */
+    async updatePlayer(matchId: string, player: Player): Promise<Match> {
         const match = this.dataStore.find((item) => item.matchId === matchId)
         if (!match) { throw new Error("match wasn't found") }
 
-        console.log("update match")
-        console.log("data to update: ", data)
-        console.log("match before update: ", match)
+        // if player has join
+        if (match.playerToSide.get(player.playerId)) {
+            throw new Error("player has join")
+        }
+
         
-        if (data.gameManager !== undefined) match.gameManager = data.gameManager
-        if (data.bluePlayer !== undefined) {
-            match.bluePlayer = data.bluePlayer
-            match.playerToSide.set(data.bluePlayer.playerId, "blue")
+        if (!match.bluePlayer) {
+            match.bluePlayer = player
+            match.bluePlayerStatus = "joined"
+            match.playerToSide.set(player.playerId, "blue")
+        } else if (!match.greenPlayer) {
+            match.greenPlayer = player
+            match.greenPlayerStatus = "joined"
+            match.playerToSide.set(player.playerId, "green")
+        } else {
+            throw new Error("Match is already full")
         }
-        if (data.greenPlayer !== undefined) {
-            match.greenPlayer = data.greenPlayer
-            match.playerToSide.set(data.greenPlayer.playerId, "green")
+
+        if (
+            match.bluePlayer &&
+            match.greenPlayer &&
+            match.bluePlayerStatus === "joined" && 
+            match.greenPlayerStatus === "joined"
+        ) {
+            // create gameManager when both player have joined
+            const gameManager = new GameManager(match.bluePlayer.playerId, match.greenPlayer.playerId)
+            match.gameManager = gameManager
+            // set status to "playing"
+            match.status = "playing"
+            match.bluePlayerStatus = "playing"
+            match.greenPlayerStatus = "playing"
         }
-        if (data.status !== undefined) match.status = data.status
-        if (data.bluePlayerStatus !== undefined) match.bluePlayerStatus = data.bluePlayerStatus
-        if (data.greenPlayerStatus !== undefined) match.greenPlayerStatus = data.greenPlayerStatus
-        console.log("match after update: ", match)
         
         return match.clone()
+    }
+
+    /**
+     * update when a player disconnect
+     */
+    async setPlayerDisconnect(matchId: string, player: Player): Promise<Match> {
+        const match = this.dataStore.find((item) => item.matchId === matchId)
+        if (!match) { throw new Error("match wasn't found") }
+        const sideOfPlayer = match.playerToSide.get(player.playerId)
+
+        if (sideOfPlayer === "blue") {
+            match.bluePlayerStatus = "disconnect"
+            match.status = "anyone-disconnect"
+        } else if (sideOfPlayer === "green") {
+            match.greenPlayerStatus = "disconnect"
+            match.status = "anyone-disconnect"
+        } else {
+            throw new Error("invalid player")
+        }
+
+        // if both player are disconnect then set match status to "break"
+        if (match.bluePlayerStatus === "disconnect" && match.greenPlayerStatus === "disconnect") {
+            match.status = "break"
+        }
+
+        return match.clone()
+    }
+
+    /**
+     * retrives a ref of player in data store (it isn't clone)
+     * @param matchId 
+     * @returns 
+     */
+    async getReferrence(matchId: string): Promise<Match | undefined> {
+        const result = this.dataStore.find((item) => item.matchId === matchId)
+        return result
+
     }
 
     async delete(matchId: string): Promise<void> {
