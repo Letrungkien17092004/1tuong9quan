@@ -1,7 +1,7 @@
 import { WaitingQueueItem } from "../entities/index.js";
 import { IWaitingQueueItemRepository } from "../interface/repositories/index.js"
 
-export default class FindOpponentUsecase {
+export default class FindOpponentOrPushToQueueUsecase {
     private waitingQueueRepo: IWaitingQueueItemRepository
 
     constructor(waitingQueueRepo: IWaitingQueueItemRepository) {
@@ -13,7 +13,9 @@ export default class FindOpponentUsecase {
      * @returns 
      */
     async excute(options: { socketId: string, playerId: string }): Promise<WaitingQueueItem | undefined> {
-        const opponent = await this.waitingQueueRepo.getFirst()
+        const alreadyInQueue = await this.waitingQueueRepo.alreadyInQueue(options.playerId)
+        if (alreadyInQueue) { throw new Error("you are in queue") }
+        const opponent = await this.waitingQueueRepo.popItem()
         if (opponent) {
             return opponent
         }

@@ -226,7 +226,7 @@ export default class GameEngine {
      * @param pieceId 
      * @param toNodeId 
      */
-    move(pieceId: string, toNodeId: string) {
+    performMove(pieceId: string, toNodeId: string) {
 
         if (!this.canMove(pieceId, toNodeId)) {
             throw new Error("invalid move")
@@ -260,7 +260,6 @@ export default class GameEngine {
         if (target.isKing) {
             const remainingPieceOfTarget = this.pieces.filter((piece) => piece.side === target.side && piece.isKing === false)
             if (remainingPieceOfTarget.length > 5) {
-                window.confirm("Chưa ăn đủ 4 quân")
                 return false
             }
         }
@@ -293,7 +292,7 @@ export default class GameEngine {
      * @param attackerId 
      * @param targetId 
      */
-    capture(attackerId: string, targetId: string) {
+    performCapture(attackerId: string, targetId: string) {
 
         if (!this.canCapture(attackerId, targetId)) {
             throw new Error("invalid capture")

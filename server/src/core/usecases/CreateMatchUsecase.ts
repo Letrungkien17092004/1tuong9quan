@@ -9,7 +9,7 @@ export default class CreateMatchUsecase {
     }
 
     async excute(): Promise<Match> {
-        const newMatch = await this.matchRepo.create({ status: "pending-join" })
+        const newMatch = await this.matchRepo.create()
         
         return newMatch
     }

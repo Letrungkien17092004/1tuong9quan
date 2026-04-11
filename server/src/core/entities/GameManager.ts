@@ -1,68 +1,103 @@
 import { GameEngine, Piece } from "./index.js"
 
+export type GameManagerState = {
+    pieces: Piece[]
+    currentTurn: "blue" | "green"
+    remainingBluePiece: number
+    remainingGreenPiece: number
+    winner: "blue" | "green" | undefined
+}
+
+
+const blueKingId = "piece_blue_17"
+const greenKingId = "piece_green_2"
 
 export default class GameManager {
     private gameEngine: GameEngine
-    private playerMappingSide: Map<string, "blue" | "green">
     private currentTurn: "blue" | "green" = "blue"
-    private playerAId: string
-    private playerBId: string
+    winner: "blue" | "green" | undefined = undefined
+    private bluePlayerId: string
+    private greenPlayerId: string
 
-    gameId: string
-    totalBluePiece = 10
-    totalGreenPiece = 10
-    isDone = false
-    gameStatus: "idle" | "playing" | "disconnect" = "idle"
+    remainingBluePiece = 10
+    remainingGreenPiece = 10
 
 
-    constructor(playerAId: string, playerBId: string, gameId: string) {
+    constructor(bluePlayerId: string, greenPlayerId: string) {
         this.gameEngine = new GameEngine()
-        this.playerMappingSide = new Map<string, "blue" | "green">([
-            [playerAId, "blue"],
-            [playerBId, "green"]
-        ])
-        this.gameId = gameId
-        this.playerAId = playerAId
-        this.playerBId = playerBId
+        this.bluePlayerId = bluePlayerId
+        this.greenPlayerId = greenPlayerId
     }
 
-    canMove(pieceId: string, nodeId: string, playerId: string): boolean {
-        const sideOfPlayer = this.playerMappingSide.get(playerId)
+    performMove(playerId: string, pieceId: string, nodeId: string): void {
+        let validTurn = this.isTurnFor(playerId)
+        let piece = this.gameEngine.getPieceById(pieceId)
+        let playerSide = this.getSideOfPlayer(playerId)
 
-        // it is not your turn
-        if (sideOfPlayer !== this.currentTurn) { return false }
+        if (!validTurn) { throw new Error("it isn't your turn") }
 
-        // the piece must be yours
-        const piece = this.gameEngine.getPieceById(pieceId)
-        if (!piece) { return false }
-        if (piece.side !== sideOfPlayer) { return false }
-        return this.gameEngine.canMove(pieceId, nodeId)
+        if (!piece) { throw new Error("piece wasn't found") }
+
+        if (playerSide !== piece.side) { throw new Error("you don't own this piece") }
+
+        this.gameEngine.performMove(pieceId, nodeId)
+        this.nextTurn()
     }
 
-    canCapture(attackerId: string, targetId: string, playerId: string): boolean {
-        const sideOfPlayer = this.playerMappingSide.get(playerId)
+    perFormCapture(playerId: string, attackerId: string, targetId: string): void {
+        let validTurn = this.isTurnFor(playerId)
+        let attacker = this.gameEngine.getPieceById(attackerId)
+        let target = this.gameEngine.getPieceById(targetId)
+        let playerSide = this.getSideOfPlayer(playerId)
 
-        // it is not your turn
-        if (sideOfPlayer !== this.currentTurn) { return false }
+        if (!validTurn) { throw new Error("it isn't your turn") }
+        if (!attacker) { throw new Error("attacker wasn't found") }
+        if (!target) { throw new Error("target wasn't found") }
+        if (attacker.isKing === false) {throw new Error("attacker isn't king")}
+        if (playerSide !== attacker.side) { throw new Error("you don't own the attacker") }
+        if (attacker.side === target.side) {throw new Error("you can't capture your own piece")}
+        if (target.isKing === true) {
+            if (playerSide === "blue" && this.remainingGreenPiece > 5)  {
+                throw new Error("you can't capture king util you have capture four piece")
+            }
+            if (playerSide === "green" && this.remainingBluePiece > 5)  {
+                throw new Error("you can't capture king util you have capture four piece")
+            }
+        }
 
-        // the piece must be yours
-        const piece = this.gameEngine.getPieceById(attackerId)
-        if (!piece) { return false }
-        if (piece.side !== sideOfPlayer) { return false }
-        return this.gameEngine.canCapture(attackerId, targetId)
 
+        this.gameEngine.performCapture(attackerId, targetId)
+        if (playerSide === "blue") {
+            this.remainingGreenPiece--;
+        } else {
+            this.remainingBluePiece--;
+        }
+        const blueKing = this.gameEngine.getPieceById(blueKingId)
+        const greenKing = this.gameEngine.getPieceById(greenKingId)
+        if (!blueKing) {
+            this.winner = "green"
+        }
+        if (!greenKing) {
+            this.winner = "blue"
+        }
+        this.nextTurn()
     }
 
-    move(pieceId: string, nodeId: string): void {
-        this.gameEngine.move(pieceId, nodeId)
+    getState(): GameManagerState {
+        return {
+            pieces: [...this.gameEngine.pieces],
+            currentTurn: this.currentTurn,
+            remainingBluePiece: this.remainingBluePiece,
+            remainingGreenPiece: this.remainingGreenPiece,
+            winner: this.winner
+        }
     }
 
-    capture(attackerId: string, targetId: string): void {
-        this.gameEngine.capture(attackerId, targetId)
-    }
-
-    getPieceState(): Piece[] {
-        return [...this.gameEngine.pieces]
+    getSideOfPlayer(playerId: string): "blue" | "green" {
+        if (playerId === this.bluePlayerId) {
+            return "blue"
+        }
+        return "green"
     }
 
     nextTurn(): void {
@@ -73,19 +108,21 @@ export default class GameManager {
         }
     }
 
+    isTurnFor(playerId: string): boolean {
+        if (playerId === this.bluePlayerId && this.currentTurn === "blue") { return true }
+        if (playerId === this.greenPlayerId && this.currentTurn === "green") { return true }
+        return false
+    }
+
     clone() {
         const copy = new GameManager(
-            this.playerAId,
-            this.playerBId,
-            this.gameId,
+            this.bluePlayerId,
+            this.greenPlayerId,
         )
         copy.gameEngine = this.gameEngine.clone()
-        copy.playerMappingSide = { ...this.playerMappingSide }
         copy.currentTurn = this.currentTurn
-        copy.totalBluePiece = this.totalBluePiece
-        copy.totalGreenPiece = this.totalGreenPiece
-        copy.isDone = this.isDone
-        copy.gameStatus = this.gameStatus
+        copy.remainingBluePiece = this.remainingBluePiece
+        copy.remainingGreenPiece = this.remainingGreenPiece
 
         return copy
     }

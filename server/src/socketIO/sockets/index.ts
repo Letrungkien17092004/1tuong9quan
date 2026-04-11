@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import playerSocket from "./playerSocket.js";
+import matchSocket from "./matchSocket.js";
 
 export function registerSocket(io: Server) {
-    playerSocket(io)
+    matchSocket(io)
 }
 
 
