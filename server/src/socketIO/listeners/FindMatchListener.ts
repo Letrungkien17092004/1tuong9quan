@@ -1,7 +1,7 @@
 import { Socket, Namespace } from "socket.io";
 import z from "zod";
 import { FindPlayerByIdUsecase, FindOpponentOrPushToQueueUsecase, CreateMatchUsecase } from "../../core/usecases/index.js";
-
+import { EventName } from "../sockets/eventName.js";
 const PayloadSchema = z.object({
     playerId: z.string().min(1)
 });
@@ -10,7 +10,6 @@ const PayloadSchema = z.object({
 export default class FindMatchListener {
     private ioNamespace: Namespace
     private socket: Socket
-    private eventName: string
     private findPlayerByIdUsecase: FindPlayerByIdUsecase
     private findOpponentOrPushToQueueUsecase: FindOpponentOrPushToQueueUsecase
     private createMatchUsecase: CreateMatchUsecase
@@ -18,14 +17,12 @@ export default class FindMatchListener {
     constructor(options: {
         ioNamespace: Namespace,
         socket: Socket,
-        eventName: string,
         findPlayerByIdUsecase: FindPlayerByIdUsecase,
         findOpponentOrPushToQueueUsecase: FindOpponentOrPushToQueueUsecase,
         createMatchUsecase: CreateMatchUsecase
     }) {
         this.ioNamespace = options.ioNamespace
         this.socket = options.socket
-        this.eventName = options.eventName
         this.findPlayerByIdUsecase = options.findPlayerByIdUsecase
         this.findOpponentOrPushToQueueUsecase = options.findOpponentOrPushToQueueUsecase
         this.createMatchUsecase = options.createMatchUsecase
@@ -41,7 +38,7 @@ export default class FindMatchListener {
 
             const player = await this.findPlayerByIdUsecase.excute(validPayload.playerId)
             if (!player) {
-                this.socket.emit(this.eventName, {
+                this.socket.emit(EventName.findMatch, {
                     status: "error",
                     message: "Unauthorized"
                 })
@@ -54,7 +51,7 @@ export default class FindMatchListener {
                 playerId: validPayload.playerId
             })
             if (!opponent) {
-                this.socket.emit(this.eventName, {
+                this.socket.emit(EventName.findMatch, {
                     status: "ok",
                     message: "waiting"
                 })
@@ -63,7 +60,7 @@ export default class FindMatchListener {
 
             const match = await this.createMatchUsecase.excute()
             this.socket.emit(
-                this.eventName,
+                EventName.findMatch,
                 {
                     status: "ok",
                     message: "match found",
@@ -71,7 +68,7 @@ export default class FindMatchListener {
                 }
             )
             this.ioNamespace.to(opponent.socketId).emit(
-                this.eventName,
+                EventName.findMatch,
                 {
                     status: "ok",
                     message: "match found",
@@ -83,25 +80,26 @@ export default class FindMatchListener {
 
             if (error instanceof z.ZodError) {
                 console.error("Validation Error:", error.cause);
-                if (typeof callback === "function") {
-                    callback({
-                        status: "error",
-                        type: "VALIDATION_FAILED",
-                        details: error.issues.map(e => e.message)
-                    });
-                }
+                this.socket.emit(EventName.findMatch, {
+                    status: "error",
+                    type: "VALIDATION_FAILED",
+                    details: error.issues.map(e => e.message)
+                })
 
                 return
             }
 
             if (error instanceof Error) {
-                this.socket.emit(this.eventName, {
-                    message: error.message
+                this.socket.emit(EventName.findMatch, {
+                    status: "error",
+                    messsage: error.message
                 })
                 return
             }
-            this.socket.emit(this.eventName, {
-                message: "unknow error",
+
+            this.socket.emit(EventName.findMatch, {
+                status: "error",
+                messsage: "unknow error",
                 error: error
             })
         }

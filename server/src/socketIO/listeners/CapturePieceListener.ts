@@ -1,29 +1,31 @@
 import { Socket, Namespace } from "socket.io";
-import { FindPlayerByIdUsecase, JoinMatchUsecase } from "../../core/usecases";
+import { FindPlayerByIdUsecase, CapturePieceUsecase } from "../../core/usecases";
 import { EventName } from "../sockets/eventName";
 import z from "zod";
 
 const PayloadScheme = z.object({
+    matchId: z.string(),
     playerId: z.string(),
-    matchId: z.string()
+    attackerId: z.string(),
+    targetId: z.string()
 })
 
-export default class JoinMatchListener {
+export default class CapturePieceListener {
     private ioNsp: Namespace
     private socket: Socket
     private findPlayerByIdUsecase: FindPlayerByIdUsecase
-    private joinMatchUsecase: JoinMatchUsecase
+    private capturePieceUsecase: CapturePieceUsecase
 
     constructor(options: {
         ioNsp: Namespace,
         socket: Socket,
         findPlayerByIdUsecase: FindPlayerByIdUsecase,
-        joinMatchUsecase: JoinMatchUsecase
+        capturePieceUsecase: CapturePieceUsecase
     }) {
         this.ioNsp = options.ioNsp
         this.socket = options.socket
         this.findPlayerByIdUsecase = options.findPlayerByIdUsecase
-        this.joinMatchUsecase = options.joinMatchUsecase
+        this.capturePieceUsecase = options.capturePieceUsecase
     }
 
     listener = async (payload: unknown, callback: unknown): Promise<void> => {
@@ -39,17 +41,18 @@ export default class JoinMatchListener {
             if (!player) {
                 throw new Error("player wasn't found")
             }
-            const match = await this.joinMatchUsecase.execute(validPayload.matchId, player)
-            this.socket.join(match.matchId)
-            this.socket.emit(EventName.joinMatch, {
-                status: "ok",
-                message: "join successfuly",
-                match_state: match.getState(),
-                your_side: match.playerToSide.get(player.playerId)
+
+            const matchAfterCapture = await this.capturePieceUsecase.excute(
+                validPayload.matchId, 
+                player.playerId, 
+                validPayload.attackerId,
+                validPayload.targetId
+            )
+
+            this.ioNsp.to(matchAfterCapture.matchId).emit(EventName.changeState, {
+                new_state: matchAfterCapture.getState()
             })
-            this.socket.to(match.matchId).emit(EventName.joinMatch, {
-                match_state: match.getState()
-            })
+
         } catch (error) {
             if (error instanceof z.ZodError) {
                 console.error("Validation Error:", error.cause);

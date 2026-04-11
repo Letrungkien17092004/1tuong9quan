@@ -1,8 +1,10 @@
-import { GameManager, Player } from "./index.js"
+import { GameManager, Player, GameManagerState } from "./index.js"
 export type MatchState = {
     status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break"
     bluePlayerStatus: "pending-join" | "joined" | "playing" | "disconnect"
-    greenPlayerStatus: "pending-join" | "joined" | "playing" | "disconnect"
+    greenPlayerStatus: "pending-join" | "joined" | "playing" | "disconnect",
+    gameManagerState: GameManagerState | undefined
+
 }
 export default class Match {
     matchId: string
@@ -39,7 +41,8 @@ export default class Match {
         return {
             status: this.status,
             bluePlayerStatus: this.bluePlayerStatus,
-            greenPlayerStatus: this.greenPlayerStatus
+            greenPlayerStatus: this.greenPlayerStatus,
+            gameManagerState: this.gameManager?.getState()
         }
     }
 

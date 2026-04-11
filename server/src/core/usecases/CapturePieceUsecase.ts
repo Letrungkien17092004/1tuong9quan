@@ -1,5 +1,5 @@
 import { IMatchRepository } from "../interface/repositories/index.js"
-
+import { Match } from "../entities/index.js"
 /**
  * this usecase handler that player movement a piece
  */
@@ -9,9 +9,9 @@ export default class CapturePieceUsecase {
 
     constructor(matchRepo: IMatchRepository) {
         this.matchRepo = matchRepo
-    } 
+    }
 
-    async excute(matchId: string, playerId: string, attackerId: string, targetId: string): Promise<void> {
+    async excute(matchId: string, playerId: string, attackerId: string, targetId: string): Promise<Match> {
         const match = await this.matchRepo.getReferrence(matchId)
         if (!match) { throw new Error("match wasn't found") }
         if (match.status !== "playing") { throw new Error("match isn't playing") }
@@ -20,5 +20,6 @@ export default class CapturePieceUsecase {
 
         // move
         match.gameManager.perFormCapture(playerId, attackerId, targetId)
+        return match.clone()
     }
 }

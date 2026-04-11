@@ -1,19 +1,22 @@
 import { Server, Socket } from "socket.io";
-import { FindMatchListener, JoinMatchListener } from "../listeners/index.js";
-import { 
-    FindPlayerByIdUsecase, 
-    FindOpponentOrPushToQueueUsecase, 
+import {
+    FindMatchListener,
+    JoinMatchListener,
+    MovePieceListener,
+    CapturePieceListener
+} from "../listeners/index.js";
+
+import {
+    FindPlayerByIdUsecase,
+    FindOpponentOrPushToQueueUsecase,
     CreateMatchUsecase,
     JoinMatchUsecase,
+    MovePieceUsecase,
+    CapturePieceUsecase
 } from "../../core/usecases/index.js"
+
 import { playerRepo, matchRepo, waitingQueueItemRepo } from "../../containers.js";
-
-enum EventName {
-    findMatch = "match:find",
-    joinMatch = "match:join",
-
-}
-
+import { EventName } from "./eventName.js";
 export default function matchSocket(io: Server) {
 
     // init usecase
@@ -21,6 +24,8 @@ export default function matchSocket(io: Server) {
     const findOpponentOrPushToQueueUsecase = new FindOpponentOrPushToQueueUsecase(waitingQueueItemRepo)
     const createMatchUsecase = new CreateMatchUsecase(matchRepo)
     const joinMatchUsecase = new JoinMatchUsecase(matchRepo)
+    const movePieceUsecase = new MovePieceUsecase(matchRepo)
+    const capturePieceUsecase = new CapturePieceUsecase(matchRepo)
 
     // namespace for find match
     const matchNamespace = io.of('/match')
@@ -30,22 +35,36 @@ export default function matchSocket(io: Server) {
         const findMatchListener = new FindMatchListener({
             ioNamespace: matchNamespace,
             socket: socket,
-            eventName: EventName.findMatch,
             findPlayerByIdUsecase: findPlayerByIdUsecase,
             findOpponentOrPushToQueueUsecase: findOpponentOrPushToQueueUsecase,
             createMatchUsecase: createMatchUsecase
         })
 
-        const joinMatchListener  = new JoinMatchListener({
+        const joinMatchListener = new JoinMatchListener({
             ioNsp: matchNamespace,
             socket: socket,
-            eventName: EventName.joinMatch,
             findPlayerByIdUsecase: findPlayerByIdUsecase,
             joinMatchUsecase: joinMatchUsecase
         })
 
+        const movePieceListener = new MovePieceListener({
+            ioNsp: matchNamespace,
+            socket: socket,
+            findPlayerByIdUsecase: findPlayerByIdUsecase,
+            movePieceUsecase: movePieceUsecase
+        })
+
+        const capturePieceListener = new CapturePieceListener({
+            ioNsp: matchNamespace,
+            socket: socket,
+            findPlayerByIdUsecase: findPlayerByIdUsecase,
+            capturePieceUsecase: capturePieceUsecase
+        })
+
         socket.on(EventName.findMatch, findMatchListener.listener)
         socket.on(EventName.joinMatch, joinMatchListener.listener)
+        socket.on(EventName.movePiece, movePieceListener.listener)
+        socket.on(EventName.capturePiece, capturePieceListener.listener)
 
     })
 

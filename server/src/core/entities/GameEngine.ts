@@ -1,29 +1,29 @@
 
-export type Node = {
+export type INode = {
     nodeId: string
     row: number
     col: number
 }
 
-export type Piece = {
+export type IPiece = {
     pieceId: string
     side: "green" | "blue"
     isKing: boolean
     nodeId: string
 }
 
-export type Line = {
+export type ILine = {
     lineId: string
     nodeIds: string[]
 }
 
 export default class GameEngine {
 
-    nodes: Node[] = []
+    nodes: INode[] = []
     edges: Record<string, string[]> = {}
-    lines: Line[] = []
+    lines: ILine[] = []
 
-    pieces: Piece[] = []
+    pieces: IPiece[] = []
 
     rows = 5
     cols = 5
@@ -161,7 +161,7 @@ export default class GameEngine {
      * @param nodeId 
      * @returns 
      */
-    getNodeFromId(nodeId: string): Node | undefined {
+    getNodeFromId(nodeId: string): INode | undefined {
         return this.nodes.find(n => n.nodeId === nodeId)
     }
 
@@ -170,7 +170,7 @@ export default class GameEngine {
      * @param pieceId 
      * @returns 
      */
-    getPieceById(pieceId: string): Piece | undefined {
+    getPieceById(pieceId: string): IPiece | undefined {
         return this.pieces.find(p => p.pieceId === pieceId)
     }
 
@@ -179,7 +179,7 @@ export default class GameEngine {
      * @param nodeId 
      * @returns 
      */
-    getPieceByNodeId(nodeId: string): Piece | undefined {
+    getPieceByNodeId(nodeId: string): IPiece | undefined {
         return this.pieces.find(p => p.nodeId === nodeId)
     }
 
@@ -189,7 +189,7 @@ export default class GameEngine {
      * @param nodeIdB 
      * @returns 
      */
-    getLineBetween(nodeIdA: string, nodeIdB: string): Line | undefined {
+    getLineBetween(nodeIdA: string, nodeIdB: string): ILine | undefined {
         return this.lines.find(l =>
             l.nodeIds.includes(nodeIdA) &&
             l.nodeIds.includes(nodeIdB)

@@ -1,7 +1,7 @@
-import { GameEngine, Piece } from "./index.js"
+import { GameEngine, IPiece } from "./index.js"
 
 export type GameManagerState = {
-    pieces: Piece[]
+    pieces: IPiece[]
     currentTurn: "blue" | "green"
     remainingBluePiece: number
     remainingGreenPiece: number
