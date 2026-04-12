@@ -8,7 +8,7 @@ export default class CreateMatchUsecase {
         this.matchRepo = matchRepo
     }
 
-    async excute(): Promise<Match> {
+    async execute(): Promise<Match> {
         const newMatch = await this.matchRepo.create()
         
         return newMatch

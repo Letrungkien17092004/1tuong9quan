@@ -36,7 +36,7 @@ export default class FindMatchListener {
             }
             const validPayload = PayloadSchema.parse(payload);
 
-            const player = await this.findPlayerByIdUsecase.excute(validPayload.playerId)
+            const player = await this.findPlayerByIdUsecase.execute(validPayload.playerId)
             if (!player) {
                 this.socket.emit(EventName.findMatch, {
                     status: "error",
@@ -46,7 +46,7 @@ export default class FindMatchListener {
                 return
             }
 
-            const opponent = await this.findOpponentOrPushToQueueUsecase.excute({
+            const opponent = await this.findOpponentOrPushToQueueUsecase.execute({
                 socketId: this.socket.id,
                 playerId: validPayload.playerId
             })
@@ -58,7 +58,7 @@ export default class FindMatchListener {
                 return
             }
 
-            const match = await this.createMatchUsecase.excute()
+            const match = await this.createMatchUsecase.execute()
             this.socket.emit(
                 EventName.findMatch,
                 {

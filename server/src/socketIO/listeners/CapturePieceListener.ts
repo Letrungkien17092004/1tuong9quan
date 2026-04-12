@@ -37,12 +37,12 @@ export default class CapturePieceListener {
             }
 
             const validPayload = PayloadScheme.parse(payload)
-            const player = await this.findPlayerByIdUsecase.excute(validPayload.playerId)
+            const player = await this.findPlayerByIdUsecase.execute(validPayload.playerId)
             if (!player) {
                 throw new Error("player wasn't found")
             }
 
-            const matchAfterCapture = await this.capturePieceUsecase.excute(
+            const matchAfterCapture = await this.capturePieceUsecase.execute(
                 validPayload.matchId, 
                 player.playerId, 
                 validPayload.attackerId,
@@ -56,7 +56,7 @@ export default class CapturePieceListener {
         } catch (error) {
             if (error instanceof z.ZodError) {
                 console.error("Validation Error:", error.cause);
-                this.socket.emit(EventName.joinMatch, {
+                this.socket.emit(EventName.capturePiece, {
                     status: "error",
                     type: "VALIDATION_FAILED",
                     details: error.issues.map(e => e.message)
@@ -65,14 +65,14 @@ export default class CapturePieceListener {
             }
 
             if (error instanceof Error) {
-                this.socket.emit(EventName.joinMatch, {
+                this.socket.emit(EventName.capturePiece, {
                     status: "error",
                     messsage: error.message
                 })
                 return
             }
 
-            this.socket.emit(EventName.joinMatch, {
+            this.socket.emit(EventName.capturePiece, {
                 status: "error",
                 messsage: "unknow error",
                 error: error

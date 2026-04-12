@@ -7,7 +7,7 @@ export default class ICreatePlayerRepository {
         this.repo = repo
     }
     
-    async excute(): Promise<Player> {
+    async execute(): Promise<Player> {
         return this.repo.generatePLayer()
     }
 }

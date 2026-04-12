@@ -37,12 +37,12 @@ export default class MovePieceListener {
             }
 
             const validPayload = PayloadScheme.parse(payload)
-            const player = await this.findPlayerByIdUsecase.excute(validPayload.playerId)
+            const player = await this.findPlayerByIdUsecase.execute(validPayload.playerId)
             if (!player) {
                 throw new Error("player wasn't found")
             }
 
-            const matchAfterMove = await this.movePieceUsecase.excute(
+            const matchAfterMove = await this.movePieceUsecase.execute(
                 validPayload.matchId, 
                 player.playerId, 
                 validPayload.targetPieceId,
@@ -56,7 +56,7 @@ export default class MovePieceListener {
         } catch (error) {
             if (error instanceof z.ZodError) {
                 console.error("Validation Error:", error.cause);
-                this.socket.emit(EventName.joinMatch, {
+                this.socket.emit(EventName.movePiece, {
                     status: "error",
                     type: "VALIDATION_FAILED",
                     details: error.issues.map(e => e.message)
@@ -65,14 +65,14 @@ export default class MovePieceListener {
             }
 
             if (error instanceof Error) {
-                this.socket.emit(EventName.joinMatch, {
+                this.socket.emit(EventName.movePiece, {
                     status: "error",
                     messsage: error.message
                 })
                 return
             }
 
-            this.socket.emit(EventName.joinMatch, {
+            this.socket.emit(EventName.movePiece, {
                 status: "error",
                 messsage: "unknow error",
                 error: error

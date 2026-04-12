@@ -11,7 +11,7 @@ export default class MovePieceUsecase {
         this.matchRepo = matchRepo
     }
 
-    async excute(matchId: string, playerId: string, targetPieceId: string, targetNodeId: string): Promise<Match> {
+    async execute(matchId: string, playerId: string, targetPieceId: string, targetNodeId: string): Promise<Match> {
         const match = await this.matchRepo.getReferrence(matchId)
         if (!match) { throw new Error("match wasn't found") }
         if (match.status !== "playing") { throw new Error("match isn't playing") }

@@ -35,7 +35,7 @@ export default class JoinMatchListener {
             }
 
             const validPayload = PayloadScheme.parse(payload)
-            const player = await this.findPlayerByIdUsecase.excute(validPayload.playerId)
+            const player = await this.findPlayerByIdUsecase.execute(validPayload.playerId)
             if (!player) {
                 throw new Error("player wasn't found")
             }
@@ -47,7 +47,9 @@ export default class JoinMatchListener {
                 match_state: match.getState(),
                 your_side: match.playerToSide.get(player.playerId)
             })
-            this.socket.to(match.matchId).emit(EventName.joinMatch, {
+
+            // boardcast to other player
+            this.socket.to(match.matchId).emit(EventName.changeState, {
                 match_state: match.getState()
             })
         } catch (error) {
