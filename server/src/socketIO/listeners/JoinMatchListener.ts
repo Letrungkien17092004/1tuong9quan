@@ -50,14 +50,14 @@ export default class JoinMatchListener {
 
             // boardcast to other player
             this.socket.to(match.matchId).emit(EventName.changeState, {
-                match_state: match.getState()
+                new_state: match.getState()
             })
         } catch (error) {
             if (error instanceof z.ZodError) {
                 console.error("Validation Error:", error.cause);
                 this.socket.emit(EventName.joinMatch, {
                     status: "error",
-                    type: "VALIDATION_FAILED",
+                    message: "VALIDATION_FAILED",
                     details: error.issues.map(e => e.message)
                 })
                 return

@@ -53,7 +53,7 @@ export default class FindMatchListener {
             if (!opponent) {
                 this.socket.emit(EventName.findMatch, {
                     status: "ok",
-                    message: "waiting"
+                    message: "Waiting"
                 })
                 return
             }
@@ -63,7 +63,7 @@ export default class FindMatchListener {
                 EventName.findMatch,
                 {
                     status: "ok",
-                    message: "match found",
+                    message: "Match found",
                     matchId: match.matchId
                 }
             )
@@ -71,7 +71,7 @@ export default class FindMatchListener {
                 EventName.findMatch,
                 {
                     status: "ok",
-                    message: "match found",
+                    message: "Match found",
                     matchId: match.matchId
                 }
             )
@@ -82,7 +82,7 @@ export default class FindMatchListener {
                 console.error("Validation Error:", error.cause);
                 this.socket.emit(EventName.findMatch, {
                     status: "error",
-                    type: "VALIDATION_FAILED",
+                    message: "VALIDATION_FAILED",
                     details: error.issues.map(e => e.message)
                 })
 
