@@ -1,6 +1,6 @@
 import RenderBoard from "../components/RenderBoard.tsx"
-import { useCallback, useState, useEffect } from "react"
-import { useOfflineBoardManager, useScreenSize } from "../hooks/index.ts"
+import { useCallback, useState, useEffect, useMemo, useRef } from "react"
+import { useOfflineBoardManager } from "../hooks/index.ts"
 import InGameHeader from "../components/InGameHeader.tsx"
 import InGameMenu from "../components/InGameMenu.tsx"
 import MatchInfo from "../components/MatchInfo.tsx"
@@ -44,101 +44,75 @@ function convertPieceToXYPosition(nodesToRender: NodeToRender[], attachedNodeId:
 }
 
 export default function PlayOffline() {
-    const width = useScreenSize()
-
-    const [boardSize, setBoardSize] = useState<BoardSize>({
-        cellSise: 0,
-        offset: 0,
-        width: 0,
-        height: 0,
-        stroke: 0
-    })
+    const boardContainerRef = useRef<HTMLDivElement | null>(null)
+    const [containerWidth, setContainerWidth] = useState(0)
 
     const gameEngine = useOfflineBoardManager()
 
     const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
     const [currentTurn, setCurrentTurn] = useState<"blue" | "green">("blue")
-    // init node to render
-    const [nodesToRender, setNodesToRender] = useState<NodeToRender[]>(gameEngine.nodes.map(node => ({
-        nodeId: node.nodeId,
-        row: node.row,
-        column: node.col,
-        pos: {
-            x: node.col * boardSize.cellSise,
-            y: node.row * boardSize.cellSise
-        }
-    })))
 
-    // init piece to render
-    const [piecesToRender, setPiecesToRender] = useState<PieceToRender[]>(gameEngine.pieces.map(piece => ({
-        pieceId: piece.pieceId,
-        side: piece.side,
-        isKing: piece.isKing,
-        isClicked: piece.pieceId === selectedId,
-        pos: convertPieceToXYPosition(nodesToRender, piece.nodeId)
-    })))
+    const boardSize = useMemo<BoardSize>(() => {
+        const nodeCount = 5
+        const reservedSpace = 32
+        const minCellSize = 60
+        const maxCellSize = 140
+        const rawCellSize = containerWidth
+            ? Math.floor((containerWidth - reservedSpace) / (nodeCount - 1))
+            : 80
+        const cellSize = Math.max(minCellSize, Math.min(maxCellSize, rawCellSize))
+        const offset = Math.max(2, Math.round(cellSize * 0.05))
+        const stroke = Math.max(1, Math.round(cellSize * 0.05))
 
-    // resize board when device resize
-    useEffect(() => {
-        let deviceOffsetScreen = 5
-        let cellSize = 60
-        let offset = 2
-        let stroke = 2
-        if (width <= 344 + deviceOffsetScreen) { // small mobile
-            cellSize = 70
-        } else if (width <= 430 + deviceOffsetScreen) { // 6.7 inch mobile
-            cellSize = 80
-        } else if (width <= 540 + deviceOffsetScreen) { // suface
-            cellSize = 80
-        } else if (width <= 768 + deviceOffsetScreen) { // ipad mini
-            cellSize = 120
-        } else if (width <= 820 + deviceOffsetScreen) { // ipad air
-            cellSize = 150
-        } else if (width <= 1024 + deviceOffsetScreen) { // ipad pro
-            cellSize = 120
-        } else if (width <= 1250 + deviceOffsetScreen) {
-            cellSize = 80
-        } else {
-            cellSize = 80
-        }
-        console.log(`size ${cellSize} offset ${offset}`)
-        setBoardSize({
+        return {
             cellSise: cellSize,
-            offset: offset,
-            width: (5 - 1) * cellSize + offset * 2,
-            height: (5 - 1) * cellSize + offset * 2,
-            stroke: stroke
-        })
-    }, [width])
+            offset,
+            width: (nodeCount - 1) * cellSize + offset * 2,
+            height: (nodeCount - 1) * cellSize + offset * 2,
+            stroke
+        }
+    }, [containerWidth])
 
-    // refesh the positions of the nodes and pieces as boardSize changes
-    useEffect(() => {
-        setNodesToRender(prevNodes => {
-            const newNodes = prevNodes.map((node) => {
-                return {
-                    nodeId: node.nodeId,
-                    row: node.row,
-                    column: node.column,
-                    pos: {
-                        x: node.column * boardSize.cellSise,
-                        y: node.row * boardSize.cellSise
-                    }
-                }
-            })
-            return newNodes
-        })
-    }, [boardSize])
+    const nodesToRender = useMemo<NodeToRender[]>(() => {
+        return gameEngine.nodes.map(node => ({
+            nodeId: node.nodeId,
+            row: node.row,
+            column: node.col,
+            pos: {
+                x: node.col * boardSize.cellSise,
+                y: node.row * boardSize.cellSise
+            }
+        }))
+    }, [gameEngine.nodes, boardSize.cellSise])
 
-    // refesh piecesToRender when a piece is selected or moved
-    useEffect(() => {
-        setPiecesToRender(gameEngine.pieces.map(piece => ({
+    const piecesToRender = useMemo<PieceToRender[]>(() => {
+        return gameEngine.pieces.map(piece => ({
             pieceId: piece.pieceId,
             side: piece.side,
             isKing: piece.isKing,
             isClicked: piece.pieceId === selectedId,
             pos: convertPieceToXYPosition(nodesToRender, piece.nodeId)
-        })))
-    }, [gameEngine.pieces, selectedId, nodesToRender])
+        }))
+    }, [gameEngine.pieces, nodesToRender, selectedId])
+
+    useEffect(() => {
+        const element = boardContainerRef.current
+        if (!element) { return }
+
+        const updateWidth = () => setContainerWidth(element.clientWidth)
+        updateWidth()
+
+        const resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                setContainerWidth(entry.contentRect.width)
+            }
+        })
+
+        resizeObserver.observe(element)
+        return () => {
+            resizeObserver.disconnect()
+        }
+    }, [])
 
     // event handler factory
     const createClickPieceEventHandler = useCallback((pieceId: string) => {
@@ -242,7 +216,7 @@ export default function PlayOffline() {
 
                 </div>
                 <div className=" col-span-12 lg:col-span-10">
-                    <div className="w-full pt-10">
+                    <div ref={boardContainerRef} className="w-full pt-10">
                         <RenderBoard
                             cellSize={boardSize.cellSise}
                             width={boardSize.width}

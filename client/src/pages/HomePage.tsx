@@ -61,7 +61,7 @@ export default function HomePage() {
         console.log("Khởi động chế độ:", mode);
         switch (mode) {
             case "ONLINE":
-                console.log("play online!")
+                navigate("/play-online-menu")
                 break;
             case "OFFLINE":
                 navigate("/play-pvp-offline")

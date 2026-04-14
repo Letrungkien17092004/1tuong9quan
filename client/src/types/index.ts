@@ -93,3 +93,12 @@ interface IBoardGraph {
 
 }
 
+interface Player {
+    playerId: string;
+    playerName: string;
+}
+
+export type {
+    Player
+}
+
