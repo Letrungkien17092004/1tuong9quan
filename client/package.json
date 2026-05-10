@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "npx tsx ./src/__tests__/services/SocketService.test.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -1,5 +1,6 @@
-import SocketService from './SocketService';
-
+import PlayerService from './PlayerService';
+import socketService from './SocketService';
 export {
-    SocketService
+    PlayerService,
+    socketService
 };

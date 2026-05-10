@@ -8,13 +8,7 @@ async function testMatchRepository() {
 
     // Test create
     console.log("\n1. Test create match")
-    const player1 = new Player("player1", "Player 1")
-    const player2 = new Player("player2", "Player 2")
-    const match = await repo.create({
-        playerA: player1,
-        playerB: player2,
-        status: "pending-join"
-    })
+    const match = await repo.create()
     console.log("Created match:", match)
 
     // Test findById

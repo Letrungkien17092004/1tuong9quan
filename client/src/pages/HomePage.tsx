@@ -58,13 +58,12 @@ export default function HomePage() {
 
     const navigate = useNavigate()
     function handleSelection(mode: PlayMode) {
-        console.log("Khởi động chế độ:", mode);
         switch (mode) {
             case "ONLINE":
-                navigate("/play-online-menu")
+                navigate("/play-online")
                 break;
             case "OFFLINE":
-                navigate("/play-pvp-offline")
+                navigate("/play-offline")
                 break;
             default:
                 break;

@@ -1,6 +1,5 @@
-
-
 import { io, Socket } from "socket.io-client";
+import type { DisconnectDescription } from "socket.io-client"
 
 export const EventName = {
     findMatch: "match:find",
@@ -57,7 +56,11 @@ export interface MatchChangeStateListenerPayload {
 
 export type MatchFindListenerPayload = | {
     status: "ok",
-    message: "Waiting" | "Match found"
+    message: "Waiting"
+} | {
+    status: "ok",
+    message: "Match found",
+    matchId: string
 } | {
     status: "error",
     message: string,
@@ -73,10 +76,14 @@ export type MatchJoinListenerPayload = | {
     message: string
 }
 
-export default class SocketService {
+class SocketService {
     private socket: Socket | null = null
     private baseUrl: string
     private namespace: string
+    private connectListeners = new Set<() => void>()
+    private connectErrorListeners = new Set<(err: Error) => void>()
+    private disconnectListeners = new Set<(reason: Socket.DisconnectReason, details?: DisconnectDescription) => void>()
+
     private changeStateListeners = new Set<(payload: MatchChangeStateListenerPayload) => void>()
     private findMatchListeners = new Set<(payload: MatchFindListenerPayload) => void>()
     private joitMatchListeners = new Set<(payload: MatchJoinListenerPayload) => void>()
@@ -102,6 +109,18 @@ export default class SocketService {
             transports: ["websocket"],
         })
 
+        this.socket.on("connect", () => {
+            this.connectListeners.forEach(listener => listener())
+        })
+
+        this.socket.on("connect_error", (err) => {
+            this.connectErrorListeners.forEach(listener => listener(err))
+        })
+
+        this.socket.on("disconnect", (reason, details) => {
+            this.disconnectListeners.forEach(listener => listener(reason, details))
+        });
+
         this.socket.on(EventName.changeState, (payload: MatchChangeStateListenerPayload) => {
             this.changeStateListeners.forEach((listener) => listener(payload))
         })
@@ -123,7 +142,34 @@ export default class SocketService {
         this.socket.off(EventName.changeState)
         this.socket.disconnect()
         this.socket = null
+        this.connectListeners.clear()
+        this.connectErrorListeners.clear()
+        this.disconnectListeners.clear()
+
         this.changeStateListeners.clear()
+        this.findMatchListeners.clear()
+        this.joitMatchListeners.clear()
+
+    }
+
+    /**
+     * Default event - connect
+     * @param listener 
+     */
+    onConnect(listener: () => void) {
+        this.connectListeners.add(listener)
+    }
+
+    /**
+     * Default event - connect_error
+     * @param listener 
+     */
+    onConnectError(listener: (err: Error) => void) {
+        this.connectErrorListeners.add(listener)
+    }
+
+    onDisconnect(listener: (reason: Socket.DisconnectReason, details?: DisconnectDescription) => void) {
+        this.disconnectListeners.add(listener)
     }
 
     onChangeState(listener: (payload: MatchChangeStateListenerPayload) => void): void {
@@ -138,26 +184,25 @@ export default class SocketService {
         this.joitMatchListeners.add(listener)
     }
 
-    private getSocket(): Socket {
+    getSocket(): Socket {
         if (!this.socket) {
             throw new Error("SocketService is not connected. Call connect() before using socket methods.")
         }
         return this.socket
-    } 
-
-
-    private emitWithAck<TPayload, TResult>(eventName: EventNameType, payload: TPayload): Promise<TResult> {
-        const socket = this.getSocket()
-
-        return new Promise<TResult>((resolve, reject) => {
-            socket.timeout(5000).emit(eventName, payload, (response: TResult) => {
-                resolve(response)
-            })
-            setTimeout(() => {
-                reject(new Error(`Socket emit timeout for event ${eventName}`))
-            }, 6000)
-        })
     }
+
+    // private emitWithAck<TPayload, TResult>(eventName: EventNameType, payload: TPayload): Promise<TResult> {
+    //     const socket = this.getSocket()
+
+    //     return new Promise<TResult>((resolve, reject) => {
+    //         socket.timeout(5000).emit(eventName, payload, (response: TResult) => {
+    //             resolve(response)
+    //         })
+    //         setTimeout(() => {
+    //             reject(new Error(`Socket emit timeout for event ${eventName}`))
+    //         }, 6000)
+    //     })
+    // }
 
     private async emit<TPayload>(eventName: EventNameType, payload: TPayload): Promise<void> {
         const socket = this.getSocket()
@@ -181,3 +226,6 @@ export default class SocketService {
         await this.emit<EmitMatchCapturePayload>(EventName.capturePiece, payload)
     }
 }
+
+const socketService = new SocketService("http://localhost:3000")
+export default socketService

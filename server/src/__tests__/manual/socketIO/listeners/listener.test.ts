@@ -1,5 +1,6 @@
 import { Namespace, Socket } from "socket.io";
-import MovePieceListener from "../../../../socketIO/listeners/MovePieceListener.js";
+import { createMovePieceHandler } from "../../../../socketIO/handlers/movePiece.js";
+import { SocketContext } from "../../../../socketIO/types.js";
 import FindPlayerByIdUsecase from "../../../../core/usecases/FindPlayerByIdUsecase.js";
 import MovePieceUsecase from "../../../../core/usecases/MovePieceUsecase.js";
 import Player from "../../../../core/entities/Player.js";
@@ -25,8 +26,8 @@ const mockSocket = {
 
 // Mock FindPlayerByIdUsecase
 const mockFindPlayerByIdUsecase = {
-    excute: async function(playerId: string): Promise<Player | undefined> {
-        console.log(`Mock FindPlayerByIdUsecase.excute called with playerId: ${playerId}`);
+    execute: async function(playerId: string): Promise<Player | undefined> {
+        console.log(`Mock FindPlayerByIdUsecase.execute called with playerId: ${playerId}`);
         if (playerId === "test-player-id") {
             return new Player("test-player-id", "Test Player");
         }
@@ -36,8 +37,8 @@ const mockFindPlayerByIdUsecase = {
 
 // Mock MovePieceUsecase
 const mockMovePieceUsecase = {
-    excute: async function(matchId: string, playerId: string, targetPieceId: string, targetNodeId: string): Promise<Match> {
-        console.log(`Mock MovePieceUsecase.excute called with matchId: ${matchId}, playerId: ${playerId}, targetPieceId: ${targetPieceId}, targetNodeId: ${targetNodeId}`);
+    execute: async function(matchId: string, playerId: string, targetPieceId: string, targetNodeId: string): Promise<Match> {
+        console.log(`Mock MovePieceUsecase.execute called with matchId: ${matchId}, playerId: ${playerId}, targetPieceId: ${targetPieceId}, targetNodeId: ${targetNodeId}`);
         return new Match({
             matchId: matchId,
             status: "playing"
@@ -45,13 +46,17 @@ const mockMovePieceUsecase = {
     }
 } as unknown as MovePieceUsecase;
 
-// Create listener instance
-const listener = new MovePieceListener({
-    ioNsp: mockIoNsp,
-    socket: mockSocket,
-    findPlayerByIdUsecase: mockFindPlayerByIdUsecase,
-    movePieceUsecase: mockMovePieceUsecase
-});
+// Create context
+const context: SocketContext = {
+    ioNamespace: mockIoNsp,
+    socket: mockSocket
+};
+
+// Create handler
+const movePieceHandler = createMovePieceHandler(
+    mockFindPlayerByIdUsecase,
+    mockMovePieceUsecase
+);
 
 // Test data
 const testPayload = {
@@ -67,11 +72,11 @@ const mockCallback = function(data: any) {
 };
 
 // Run the test
-console.log("Running MovePieceListener manual test...");
+console.log("Running MovePieceHandler manual test...");
 
 (async () => {
     try {
-        await listener.listener(testPayload, mockCallback);
+        await movePieceHandler(context, testPayload, mockCallback);
         console.log("Test completed successfully!");
     } catch (error) {
         console.error("Test failed:", error);
@@ -79,9 +84,9 @@ console.log("Running MovePieceListener manual test...");
 
     // Test invalid payload
     console.log("\nTesting invalid payload...");
-    const invalidPayload = { invalid: "data" };
+    const invalidPayload = { invalid: "data" } as unknown;
     try {
-        await listener.listener(invalidPayload, mockCallback);
+        await movePieceHandler(context, invalidPayload, mockCallback);
         console.log("Invalid payload test completed.");
     } catch (error) {
         console.error("Invalid payload test failed:", error);
@@ -89,17 +94,17 @@ console.log("Running MovePieceListener manual test...");
 
     // Test player not found
     console.log("\nTesting player not found...");
-    const originalExcute = mockFindPlayerByIdUsecase.excute;
-    mockFindPlayerByIdUsecase.excute = async function(playerId: string): Promise<Player | undefined> {
-        console.log(`Mock FindPlayerByIdUsecase.excute called with playerId: ${playerId} (returning undefined)`);
+    const originalExecute = mockFindPlayerByIdUsecase.execute;
+    mockFindPlayerByIdUsecase.execute = async function(playerId: string): Promise<Player | undefined> {
+        console.log(`Mock FindPlayerByIdUsecase.execute called with playerId: ${playerId} (returning undefined)`);
         return undefined;
     };
     try {
-        await listener.listener(testPayload, mockCallback);
+        await movePieceHandler(context, testPayload, mockCallback);
         console.log("Player not found test completed.");
     } catch (error) {
         console.error("Player not found test failed:", error);
     }
     // Restore
-    mockFindPlayerByIdUsecase.excute = originalExcute;
+    mockFindPlayerByIdUsecase.execute = originalExecute;
 })();

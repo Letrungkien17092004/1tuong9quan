@@ -1,9 +1,10 @@
 import HomePage from "./HomePage.tsx";
 import PlayOffline from "./PlayOffline.tsx";
-import PlayOnlineMenu from "./PlayOnlineMenu.tsx";
-
+import Lobby from "./Lobby.tsx";
+import { playerLoader } from "./Lobby.tsx";
 export {
     HomePage,
     PlayOffline,
-    PlayOnlineMenu
+    Lobby,
+    playerLoader
 }
