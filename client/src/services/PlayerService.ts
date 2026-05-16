@@ -20,7 +20,9 @@ type FindByIdResponse = {
 
 class PlayerService {
     private baseUrl: string;
-
+    cacheData : {
+        player?: Player
+    } = {}
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
     }
@@ -77,6 +79,19 @@ class PlayerService {
         }
         return null;
     }
+
+    updateCache(player: Player) {
+        this.cacheData.player = {
+            playerId: player.playerId,
+            playerName: player.playerName
+        }
+    }
+
+    clearCache() {
+        this.cacheData = {}
+    }
 }
 
-export default PlayerService;
+const playerService = new PlayerService("http://localhost:3000")
+
+export default playerService;

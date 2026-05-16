@@ -51,7 +51,7 @@ function MenuOption({ title, description, icon, color, onClick }: {
 }
 
 
-type PlayMode = "ONLINE" | "OFFLINE" | "TUTORIAL"
+type PlayMode = "ONLINE" | "OFFLINE" | "TUTORIAL" | "TEST"
 
 export default function HomePage() {
 
@@ -64,6 +64,9 @@ export default function HomePage() {
                 break;
             case "OFFLINE":
                 navigate("/play-offline")
+                break;
+            case "TEST":
+                navigate("/match/match-1")
                 break;
             default:
                 break;
@@ -111,6 +114,14 @@ export default function HomePage() {
                     description="Cách điều khiển và luật chơi"
                     color="from-orange-600 to-yellow-500"
                     onClick={() => handleSelection('TUTORIAL')}
+                    icon={<path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" />}
+                />
+
+                <MenuOption
+                    title="TEST"
+                    description="Cách điều khiển và luật chơi"
+                    color="from-orange-600 to-yellow-500"
+                    onClick={() => handleSelection('TEST')}
                     icon={<path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" />}
                 />
             </div>

@@ -73,7 +73,25 @@ export type MatchJoinListenerPayload = | {
     details: any
 } | {
     status: "ok",
-    message: string
+    message: "join successfuly",
+    match_state: {
+        status: "pending-join" | "playing" | "anyone-disconnect" | "done" | "break",
+        bluePlayerStatus: "pending-join" | "joined" | "playing" | "disconnect",
+        greenPlayerStatus: "pending-join" | "joined" | "playing" | "disconnect",
+        gameManagerState?: {
+            pieces: {
+                pieceId: string
+                side: "green" | "blue"
+                isKing: boolean
+                nodeId: string
+            }[],
+            currentTurn: "blue" | "green",
+            remainingBluePiece: number,
+            remainingGreenPiece: number,
+            winner?: "blue" | "green"
+        }
+    },
+    your_side: "blue" | "green"
 }
 
 class SocketService {
@@ -172,19 +190,35 @@ class SocketService {
         this.disconnectListeners.add(listener)
     }
 
+    // ###############################
     onChangeState(listener: (payload: MatchChangeStateListenerPayload) => void): void {
         this.changeStateListeners.add(listener)
     }
 
+    offChangeState(listener: (payload: MatchChangeStateListenerPayload) => void): void {
+        this.changeStateListeners.delete(listener)
+    }
+
+
+    // ###############################
     onFindMatch(listener: (payload: MatchFindListenerPayload) => void): void {
         this.findMatchListeners.add(listener)
     }
 
+    offFindMatch(listener: (payload: MatchFindListenerPayload) => void): void {
+        this.findMatchListeners.delete(listener)
+    }
+
+    // ###############################
     onJoinMatch(listener: (payload: MatchJoinListenerPayload) => void): void {
         this.joitMatchListeners.add(listener)
     }
 
-    getSocket(): Socket {
+    offJoinMatch(listener: (payload: MatchJoinListenerPayload) => void): void {
+        this.joitMatchListeners.delete(listener)
+    }
+
+    get getSocket(): Socket {
         if (!this.socket) {
             throw new Error("SocketService is not connected. Call connect() before using socket methods.")
         }
@@ -205,7 +239,7 @@ class SocketService {
     // }
 
     private async emit<TPayload>(eventName: EventNameType, payload: TPayload): Promise<void> {
-        const socket = this.getSocket()
+        const socket = this.getSocket
 
         socket.emit(eventName, payload)
     }
@@ -227,5 +261,5 @@ class SocketService {
     }
 }
 
-const socketService = new SocketService("http://localhost:3000")
+const socketService = new SocketService("http://localhost:3000", { autoConnect: false })
 export default socketService

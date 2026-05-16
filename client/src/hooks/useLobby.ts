@@ -1,22 +1,48 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { socketService } from "../services";
+import type { MatchFindListenerPayload } from "../services/SocketService";
 
 type FindStatus = "waiting" | "match found"
-type ConnnectStatus = "nothing" | "connected" | "connnect_error"
 
-export default function useLobby() {
-    const [connectStatus, setConnectStatus] = useState<ConnnectStatus>("nothing")
+type UseLobbyReturnType = {
+    findMatch: (playerId: string) => Promise<void>,
+    findStatus: FindStatus | undefined,
+    matchId: string | undefined
+}
+export default function useLobby(): UseLobbyReturnType {
     const [matchId, setMatchId] = useState<string | undefined>(undefined)
     const [findStatus, setFindStatus] = useState<FindStatus | undefined>(undefined)
 
-    const findMatch = useCallback(async (playerId: string) => {
-        if (connectStatus === "nothing") {
-            throw new Error("socket wasn't connected")
-        }
+    useEffect(() => {
 
-        if (connectStatus === "connnect_error") {
-            throw new Error("there is an error, can't find now")
+        const listener = (payload: MatchFindListenerPayload) => {
+            if (payload.status === "ok") {
+                if (payload.message === "Waiting") {
+                    setFindStatus("waiting")
+                }
+
+                if (payload.message === "Match found") {
+                    setFindStatus("match found")
+                    setMatchId(payload.matchId)
+                }
+            }
         }
-        const result = await socketService.findMatch({ playerId: playerId })
-    }, [connectStatus])
+        socketService.onFindMatch(listener)
+        socketService.connect()
+
+        return () => {
+            socketService.offFindMatch(listener)
+        }
+    }, [])
+
+    const findMatch = useCallback(async (playerId: string) => {
+        await socketService.findMatch({ playerId: playerId })
+    }, [socketService])
+
+
+    return {
+        findMatch: findMatch,
+        findStatus,
+        matchId
+    }
 }

@@ -59,18 +59,40 @@ export function bootMatchNamespace(io: Server) {
         };
 
         // Register event listeners
+
+        // event: match:find
+        // payload: {playerId: string}
         socket.on(EventName.findMatch, (payload: unknown, callback: unknown) => {
             findMatchHandler(context, payload, callback);
         });
 
+        // event: match:join
+        // payload: {playerId: strin, matchId: string}
         socket.on(EventName.joinMatch, (payload: unknown, callback: unknown) => {
+            console.log("joine match triger. payload: ", payload)
             joinMatchHandler(context, payload, callback);
         });
 
+        // event: match:move
+        /* payload: {
+            matchId: string,
+            playerId: string,
+            targetPieceId: string,
+            targetNodeId: string
+        }
+        */
         socket.on(EventName.movePiece, (payload: unknown, callback: unknown) => {
             movePieceHandler(context, payload, callback);
         });
 
+        // event: match:capture
+        /* payload: {
+            matchId: string,
+            playerId: string,
+            attackerId: string,
+            targetId: string
+        }
+        */
         socket.on(EventName.capturePiece, (payload: unknown, callback: unknown) => {
             capturePieceHandler(context, payload, callback);
         });

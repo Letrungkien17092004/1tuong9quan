@@ -1,6 +1,6 @@
 // src/routers/index.tsx
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { HomePage, PlayOffline, Lobby, playerLoader } from "../pages/index.tsx";
+import { HomePage, PlayOffline, Lobby, playerLoader, PlayOnline, playOnlineLoader } from "../pages/index.tsx";
 import LoadingSpinner from "../components/Loading.tsx";
 
 // 1. Định nghĩa router bằng hàm thay vì Component JSX
@@ -19,6 +19,13 @@ const router = createBrowserRouter([
         loader: playerLoader, // Loader chỉ chạy khi dùng createBrowserRouter,
         hydrateFallbackElement: <LoadingSpinner />
     },
+
+    {
+        path: "/match/:matchId",
+        element: <PlayOnline />,
+        loader: playOnlineLoader,
+        hydrateFallbackElement: <LoadingSpinner />
+    }
 ]);
 
 // 2. Component Routers chính sẽ trả về RouterProvider
