@@ -1,5 +1,5 @@
 import type { Player } from '../types';
-
+import ENV from '../config/ENV';
 
 
 type CreateResponse = {
@@ -20,7 +20,7 @@ type FindByIdResponse = {
 
 class PlayerService {
     private baseUrl: string;
-    cacheData : {
+    cacheData: {
         player?: Player
     } = {}
     constructor(baseUrl: string) {
@@ -92,6 +92,6 @@ class PlayerService {
     }
 }
 
-const playerService = new PlayerService("http://localhost:3000")
+const playerService = new PlayerService(ENV.BASE_API_URL)
 
 export default playerService;
