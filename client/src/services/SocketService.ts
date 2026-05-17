@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import type { DisconnectDescription } from "socket.io-client"
-
+import ENV from "../config/ENV";
 export const EventName = {
     findMatch: "match:find",
     joinMatch: "match:join",
@@ -261,5 +261,5 @@ class SocketService {
     }
 }
 
-const socketService = new SocketService("http://localhost:3000", { autoConnect: false })
+const socketService = new SocketService(ENV.BASE_API_URL, { autoConnect: false })
 export default socketService
