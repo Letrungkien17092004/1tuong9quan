@@ -9,7 +9,7 @@ export default class GetPlayerByIdUsecase {
         this.playerRepo = playerRepo
     }
 
-    async excute(playerId: string): Promise<Player | undefined> {
+    async execute(playerId: string): Promise<Player | undefined> {
         const player = this.playerRepo.findPlayerById(playerId)
         return player
     }

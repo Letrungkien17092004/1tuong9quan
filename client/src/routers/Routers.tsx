@@ -1,13 +1,34 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HomePage, PlayOffline } from "../pages/index.tsx";
+// src/routers/index.tsx
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { HomePage, PlayOffline, Lobby, playerLoader, PlayOnline, playOnlineLoader } from "../pages/index.tsx";
+import LoadingSpinner from "../components/Loading.tsx";
 
+// 1. Định nghĩa router bằng hàm thay vì Component JSX
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <HomePage />,
+    },
+    {
+        path: "/play-offline",
+        element: <PlayOffline />,
+    },
+    {
+        path: "/play-online",
+        element: <Lobby />,
+        loader: playerLoader, // Loader chỉ chạy khi dùng createBrowserRouter,
+        hydrateFallbackElement: <LoadingSpinner />
+    },
+
+    {
+        path: "/match/:matchId",
+        element: <PlayOnline />,
+        loader: playOnlineLoader,
+        hydrateFallbackElement: <LoadingSpinner />
+    }
+]);
+
+// 2. Component Routers chính sẽ trả về RouterProvider
 export default function Routers() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/play-pvp-offline" element={<PlayOffline />} />
-            </Routes>
-        </BrowserRouter>
-    )
+    return <RouterProvider router={router} />;
 }

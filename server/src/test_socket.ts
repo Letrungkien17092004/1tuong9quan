@@ -11,28 +11,20 @@ async function main() {
 
     socket.on("connect", () => {
         console.log("connected")
-        console.log("emit")
-        socket.emit("player:find-match", {
-            playerId: "lol"
+        // socket.timeout(2000).emit("test", { data: "123" }, (err: any) => {
+        //     console.log("log in timeout + ack")
+        //     console.log("err: ", err)
+        // })
+
+        socket.emit("test", { data: "123" }, (response: any) => {
+            console.log("log in ack")
+            console.log("response: ", response)
         })
     })
 
-    socket.on("player:find-match", async (payload: any, callback: any) => {
-        if (payload.status === "ok") {
-            console.log("payload: ", payload)
-        } else if (payload.status === "error" && payload.message === "Unauthorized") {
-            console.log("error: ", payload.message)
-            const genPlayerResponse = await fetch(`${base_url}/api/player`, {
-                method: "POST"
-            })
-
-            const data = await genPlayerResponse.json()
-            console.log("gen player data: ", data.player.playerId)
-            socket.emit("player:find-match", {
-                playerId: data.player.playerId
-            })
-
-        }
+    socket.on("test", async (payload: any, callback: any) => {
+        console.log("test event triger")
+        console.log(payload, callback)
     })
 }
 

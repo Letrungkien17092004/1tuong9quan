@@ -12,7 +12,7 @@ export default class FindOpponentOrPushToQueueUsecase {
      * get an opponent from Waiting queue, if no have then push to waiting queue
      * @returns 
      */
-    async excute(options: { socketId: string, playerId: string }): Promise<WaitingQueueItem | undefined> {
+    async execute(options: { socketId: string, playerId: string }): Promise<WaitingQueueItem | undefined> {
         const alreadyInQueue = await this.waitingQueueRepo.alreadyInQueue(options.playerId)
         if (alreadyInQueue) { throw new Error("you are in queue") }
         const opponent = await this.waitingQueueRepo.popItem()

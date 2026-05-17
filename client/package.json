@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "npx tsx ./src/__tests__/services/SocketService.test.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -14,6 +15,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0",
+    "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
