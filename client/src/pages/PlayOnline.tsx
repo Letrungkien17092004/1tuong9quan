@@ -1,9 +1,9 @@
-import { useLoaderData, useParams } from "react-router-dom"
+import { useLoaderData, useNavigate, useParams } from "react-router-dom"
 import { playerService } from "../services"
 import { usePlayOnline, useOnlineEngine } from "../hooks"
 import { useEffect, useRef, useState, useMemo, useCallback } from "react"
 import RenderBoard from "../components/RenderBoard.tsx"
-
+import GameResultOverlay from "../components/GameResultOverlay.tsx"
 
 type BoardSize = {
     cellSise: number,
@@ -66,12 +66,24 @@ export async function playerLoader() {
 export default function PlayOnline() {
     const player = useLoaderData() as { playerId: string, playerName: string }
     const { matchId } = useParams() as { matchId: string }
-    const { joiMatch, matchState } = usePlayOnline()
+    const navigate = useNavigate()
+    const { joiMatch, matchState, move, capture } = usePlayOnline()
 
     const boardContainerRef = useRef<HTMLDivElement | null>(null)
-    const [selectedId, setSelectedId] = useState<string>("")
+    const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
     const [containerWidth, setContainerWidth] = useState(0)
-    const { nodes, pieces, setMatchState, yourSide, remainingPiece, currentTurn, summaryStatus } = useOnlineEngine()
+    const {
+        nodes,
+        pieces,
+        setMatchState,
+        yourSide,
+        remainingPiece,
+        currentTurn,
+        summaryStatus,
+        getPieceById,
+        winner
+    } = useOnlineEngine()
+
     const boardSize = useMemo<BoardSize>(() => {
         const nodeCount = 5
         const reservedSpace = 32
@@ -119,20 +131,59 @@ export default function PlayOnline() {
     const clickNodeEventFactory = useCallback((nodeId: string) => {
         return (e: React.MouseEvent) => {
             e.stopPropagation()
-            console.log("click nodeId: ", nodeId)
+            if (winner) { return }
+
+            if (selectedId) {
+                console.log("call move")
+                move(player.playerId, matchId, selectedId, nodeId)
+                setSelectedId(undefined)
+            }
         }
-    }, [])
+    }, [move, matchId, selectedId, winner])
 
     const clickPieceEventFactory = useCallback((pieceId: string) => {
         return (e: React.MouseEvent) => {
             e.stopPropagation()
+            console.log("click pieceId: ", pieceId)
+            if (winner) { return }
+
+            if (summaryStatus.matchStatus !== "playing") {
+                console.log("match status !== playing, can't do anything")
+                return
+            }
+
+            const currClickPiece = getPieceById(pieceId)
+            if (!currClickPiece) {
+                throw new Error("Piece wasn't found")
+            }
+
             if (!selectedId) {
+                if (currClickPiece.side !== yourSide) {
+                    return
+                }
                 setSelectedId(pieceId)
                 return
             }
-            console.log("click pieceId: ", pieceId)
+
+            const selectedPiece = getPieceById(selectedId)!
+            if (selectedPiece.side === currClickPiece.side) {
+                setSelectedId(currClickPiece.pieceId)
+                return
+            } else {
+                if (selectedPiece.isKing) {
+                    capture(player.playerId, matchId, selectedId, currClickPiece.pieceId)
+                    setSelectedId(undefined)
+                }
+            }
         }
-    }, [selectedId])
+    }, [selectedId, getPieceById, yourSide, capture, winner])
+
+    const onReset = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation()
+        navigate("/")
+    }, [])
+
+
 
     useEffect(() => {
         joiMatch(player.playerId, matchId)
@@ -160,12 +211,15 @@ export default function PlayOnline() {
             resizeObserver.disconnect()
         }
     }, [])
-
-
+    console.log(winner)
     return (
 
         <div className="min-h-screen bg-[#050811] flex flex-col">
             <div className="w-full grid grid-cols-12">
+                {
+                    winner && <GameResultOverlay winner={winner} onReset={onReset} />
+                }
+
                 {/* sidebar */}
                 <div className="col-span-3">
                     <div className="w-full h-screen p-3">

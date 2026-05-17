@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { usePlayOnline } from "./index"
 
 type Piece = {
@@ -82,6 +82,12 @@ function createDefaultPiece(): Piece[] {
 
 export default function useOnlineEngine() {
     const [matchState, setMatchState] = useState<MatchState | undefined>(undefined)
+    const winner: "blue" | "green" | undefined = useMemo(() => {
+        if (matchState && matchState.gameManagerState) {
+            return matchState.gameManagerState.winner
+        }
+        return undefined
+    }, [matchState])
     const remainingPiece: { blue: number, green: number } = useMemo(() => {
         if (matchState && matchState.gameManagerState) {
             return {
@@ -156,6 +162,10 @@ export default function useOnlineEngine() {
 
     }, [matchState])
 
+    const getPieceById = useCallback((pieceId: string) => {
+        return pieces.find(item => item.pieceId === pieceId)
+    }, [pieces])
+
     return {
         nodes,
         pieces,
@@ -163,6 +173,8 @@ export default function useOnlineEngine() {
         yourSide: yourSide,
         remainingPiece,
         currentTurn,
-        summaryStatus
+        summaryStatus,
+        getPieceById,
+        winner
     }
 }
