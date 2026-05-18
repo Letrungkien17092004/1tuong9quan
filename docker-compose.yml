@@ -1,0 +1,17 @@
+services:
+  client:
+    build: ./client
+    container_name: 1tuong9quan_client
+    environment:
+      - VITE_BASE_API_URL=http://localhost:3000
+    expose:
+      - 8000
+    ports:
+      - "8000:8000"
+  server:
+    build: ./server
+    container_name: 1tuong9quan_server
+    expose:
+      - 3000
+    ports:
+      - "3000:3000"
