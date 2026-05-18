@@ -1,7 +1,11 @@
 import { Server } from "socket.io";
 import { bootMatchNamespace } from "./namespaces/index.js";
 
-const io = new Server();
+const io = new Server({
+    cors: {
+        origin: "*",
+    }
+});
 
 // Boot all namespaces
 bootMatchNamespace(io);

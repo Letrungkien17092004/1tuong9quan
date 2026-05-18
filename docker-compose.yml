@@ -3,15 +3,18 @@ services:
     build: ./client
     container_name: 1tuong9quan_client
     environment:
-      - VITE_BASE_API_URL=http://localhost:3000
-    expose:
-      - 8000
-    ports:
-      - "8000:8000"
-  server:
-    build: ./server
-    container_name: 1tuong9quan_server
+      - VITE_BASE_API_URL=http://75.101.212.214:3001
+      - VITE_PORT=3000
     expose:
       - 3000
     ports:
       - "3000:3000"
+  server:
+    build: ./server
+    container_name: 1tuong9quan_server
+    environment:
+      - PORT=3001
+    expose:
+      - 3001
+    ports:
+      - "3001:3001"
